@@ -1,0 +1,218 @@
+@import 'tailwindcss';
+@import 'shadcn/tailwind.css';
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+
+  html {
+    @apply font-sans scroll-smooth;
+  }
+
+  body {
+    @apply bg-white text-gray-900;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold text-gray-900;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  p {
+    @apply text-gray-700 leading-relaxed;
+  }
+
+  a {
+    @apply text-red-600 hover:text-red-700 transition-colors;
+  }
+
+  button {
+    @apply transition-all duration-300;
+  }
+}
+
+/* Glass morphism utilities */
+.glass {
+  @apply backdrop-blur-md bg-white/20 border border-white/30 rounded-lg;
+}
+
+.glass-dark {
+  @apply backdrop-blur-md bg-black/20 border border-white/10 rounded-lg;
+}
+
+/* Gradient backgrounds */
+.gradient-primary {
+  @apply bg-gradient-to-r from-red-600 to-red-800;
+}
+
+.gradient-text {
+  @apply bg-gradient-to-r from-red-600 via-red-700 to-red-900 bg-clip-text text-transparent;
+}
+
+.clear-heading {
+  display: block;
+  overflow: visible;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+  line-height: 1.18;
+  padding-block: 0.08em 0.14em;
+}
+
+/* Premium shadows */
+.shadow-premium {
+  @apply shadow-[0_20px_60px_rgba(220,38,38,0.1)];
+}
+
+.shadow-premium-hover {
+  @apply shadow-[0_30px_80px_rgba(220,38,38,0.15)];
+}
+
+/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes premiumPulse {
+  0%,
+  100% {
+    filter: saturate(1) brightness(1);
+    transform: scale(1);
+  }
+  50% {
+    filter: saturate(1.28) brightness(1.08);
+    transform: scale(1.03);
+  }
+}
+
+@keyframes aboutHeroKenBurns {
+  0% {
+    filter: saturate(1.02) contrast(1.04) brightness(0.9);
+    transform: scale(1);
+  }
+  50% {
+    filter: saturate(1.18) contrast(1.08) brightness(0.98);
+  }
+  100% {
+    filter: saturate(1.08) contrast(1.08) brightness(0.92);
+    transform: scale(1.1);
+  }
+}
+
+.about-hero-kenburns {
+  animation: aboutHeroKenBurns 24s ease-in-out infinite alternate;
+  transform-origin: center center;
+}
+
+.animate-slideInUp {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.animate-slideInDown {
+  animation: slideInDown 0.6s ease-out;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.6s ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.6s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Scroll animations */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease-out;
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
