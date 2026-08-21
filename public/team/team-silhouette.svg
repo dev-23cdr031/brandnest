@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Premium team silhouette">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="24%" r="72%">
+      <stop offset="0" stop-color="#ef4444" stop-opacity=".7"/>
+      <stop offset=".42" stop-color="#7f1d1d" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#050505"/>
+    </radialGradient>
+    <linearGradient id="line" x1="0" x2="1">
+      <stop stop-color="#fff" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#g)"/>
+  <g opacity=".28">
+    <path d="M0 210h1600M0 420h1600M0 630h1600M0 840h1600" stroke="url(#line)" stroke-width="1"/>
+    <path d="M160 0v1000M400 0v1000M640 0v1000M880 0v1000M1120 0v1000M1360 0v1000" stroke="#fff" stroke-opacity=".11"/>
+  </g>
+  <g fill="#020202" opacity=".88">
+    <ellipse cx="800" cy="865" rx="680" ry="125"/>
+    <path d="M329 739c24-110 97-172 191-172s169 62 193 172v137H329z"/>
+    <circle cx="520" cy="459" r="105"/>
+    <path d="M656 718c29-150 126-235 256-235s227 85 256 235v169H656z"/>
+    <circle cx="912" cy="341" r="137"/>
+    <path d="M1054 748c23-111 98-174 194-174s172 63 195 174v129h-389z"/>
+    <circle cx="1248" cy="467" r="103"/>
+  </g>
+  <g fill="none" stroke="#ef4444" stroke-opacity=".58">
+    <circle cx="912" cy="341" r="168"/>
+    <circle cx="520" cy="459" r="128"/>
+    <circle cx="1248" cy="467" r="126"/>
+  </g>
+</svg>

@@ -1,0 +1,71 @@
+<svg width="1800" height="1100" viewBox="0 0 1800 1100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1800" height="1100" fill="#050505"/>
+  <radialGradient id="g1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1280 430) rotate(132) scale(860 520)">
+    <stop stop-color="#F43F5E" stop-opacity=".55"/>
+    <stop offset=".42" stop-color="#DC2626" stop-opacity=".2"/>
+    <stop offset="1" stop-color="#050505" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="g2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(440 500) rotate(42) scale(720 420)">
+    <stop stop-color="#991B1B" stop-opacity=".5"/>
+    <stop offset=".54" stop-color="#7F1D1D" stop-opacity=".18"/>
+    <stop offset="1" stop-color="#050505" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="tower" x1="900" y1="274" x2="900" y2="920" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#FFFFFF" stop-opacity=".28"/>
+    <stop offset=".38" stop-color="#DC2626" stop-opacity=".24"/>
+    <stop offset="1" stop-color="#090909" stop-opacity=".8"/>
+  </linearGradient>
+  <rect width="1800" height="1100" fill="url(#g1)"/>
+  <rect width="1800" height="1100" fill="url(#g2)"/>
+  <g opacity=".28">
+    <path d="M0 782H1800" stroke="#EF4444"/>
+    <path d="M84 733H1716" stroke="#EF4444" stroke-opacity=".6"/>
+    <path d="M188 688H1612" stroke="#EF4444" stroke-opacity=".35"/>
+    <path d="M290 648H1510" stroke="#EF4444" stroke-opacity=".2"/>
+    <path d="M900 590V1100" stroke="#EF4444"/>
+    <path d="M742 616L510 1100" stroke="#EF4444" stroke-opacity=".7"/>
+    <path d="M1058 616L1290 1100" stroke="#EF4444" stroke-opacity=".7"/>
+    <path d="M610 656L190 1100" stroke="#EF4444" stroke-opacity=".45"/>
+    <path d="M1190 656L1610 1100" stroke="#EF4444" stroke-opacity=".45"/>
+  </g>
+  <g filter="url(#blur)">
+    <path d="M0 880C260 820 390 902 610 850C870 788 1030 806 1245 850C1480 898 1608 830 1800 866V1100H0V880Z" fill="#0B0B0B"/>
+  </g>
+  <g>
+    <path d="M82 930V642L202 588V930H82Z" fill="url(#tower)" stroke="#FFFFFF" stroke-opacity=".12"/>
+    <path d="M230 930V520L400 446V930H230Z" fill="url(#tower)" stroke="#FFFFFF" stroke-opacity=".12"/>
+    <path d="M440 930V610L554 548V930H440Z" fill="url(#tower)" stroke="#FFFFFF" stroke-opacity=".12"/>
+    <path d="M604 930V390L756 298V930H604Z" fill="url(#tower)" stroke="#FFFFFF" stroke-opacity=".12"/>
+    <path d="M790 930V470L900 328L1010 470V930H790Z" fill="url(#tower)" stroke="#FFFFFF" stroke-opacity=".16"/>
+    <path d="M1050 930V360L1210 276V930H1050Z" fill="url(#tower)" stroke="#FFFFFF" stroke-opacity=".12"/>
+    <path d="M1256 930V576L1398 518V930H1256Z" fill="url(#tower)" stroke="#FFFFFF" stroke-opacity=".12"/>
+    <path d="M1438 930V454L1640 362V930H1438Z" fill="url(#tower)" stroke="#FFFFFF" stroke-opacity=".12"/>
+  </g>
+  <g opacity=".88">
+    <path d="M900 328V128" stroke="#EF4444" stroke-width="3"/>
+    <circle cx="900" cy="118" r="9" fill="#FFFFFF"/>
+    <circle cx="900" cy="118" r="34" stroke="#EF4444" stroke-opacity=".35"/>
+    <circle cx="900" cy="118" r="68" stroke="#EF4444" stroke-opacity=".16"/>
+  </g>
+  <g opacity=".65">
+    <circle cx="312" cy="238" r="3" fill="#FFFFFF"/>
+    <circle cx="438" cy="170" r="2" fill="#EF4444"/>
+    <circle cx="1370" cy="212" r="3" fill="#FFFFFF"/>
+    <circle cx="1510" cy="310" r="2" fill="#EF4444"/>
+    <circle cx="1124" cy="158" r="2" fill="#FFFFFF"/>
+    <path d="M312 238L438 170L620 248" stroke="#EF4444" stroke-opacity=".24"/>
+    <path d="M1124 158L1370 212L1510 310" stroke="#EF4444" stroke-opacity=".24"/>
+  </g>
+  <g opacity=".74">
+    <rect x="262" y="558" width="90" height="4" rx="2" fill="#EF4444"/>
+    <rect x="644" y="470" width="76" height="4" rx="2" fill="#FFFFFF"/>
+    <rect x="1090" y="442" width="84" height="4" rx="2" fill="#EF4444"/>
+    <rect x="1480" y="536" width="96" height="4" rx="2" fill="#FFFFFF"/>
+    <rect x="838" y="522" width="124" height="4" rx="2" fill="#EF4444"/>
+  </g>
+  <defs>
+    <filter id="blur" x="-80" y="700" width="1960" height="500" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+  </defs>
+</svg>
