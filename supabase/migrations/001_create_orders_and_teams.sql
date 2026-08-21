@@ -11,6 +11,8 @@
 -- =============================================
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid
+    references auth.users(id) on delete cascade,
   created_at timestamptz not null default now(),
   service text not null,
   price text not null,
@@ -33,12 +35,33 @@ create policy "Allow anon insert orders"
   to anon, authenticated
   with check (true);
 
--- Admins (authenticated) can view orders
-drop policy if exists "Allow anon select orders" on public.orders;
-create policy "Allow anon select orders"
+-- Helper: is the current user the BrandNest admin?
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from auth.users
+    where id = auth.uid()
+      and email = 'devdharrshans.23csd@kongu.edu'
+  );
+$$;
+
+-- Customers can view their own orders only
+drop policy if exists "Allow users select own orders" on public.orders;
+create policy "Allow users select own orders"
   on public.orders for select
-  to anon, authenticated
-  using (true);
+  to authenticated
+  using (auth.uid() = user_id);
+
+-- Admin can view all orders
+drop policy if exists "Allow admin select all orders" on public.orders;
+create policy "Allow admin select all orders"
+  on public.orders for select
+  to authenticated
+  using (public.is_admin());
 
 -- Authenticated users (admins) can update order status
 drop policy if exists "Allow authenticated update orders" on public.orders;

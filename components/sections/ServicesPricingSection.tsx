@@ -205,6 +205,7 @@ function OrderModal({ service, onClose }: { service: ServiceItem; onClose: () =>
     e.preventDefault()
     setLoading(true)
 
+    const { data: { user } } = await supabase.auth.getUser()
     const { error } = await supabase.from('orders').insert([
       {
         service: service.name,
@@ -216,6 +217,7 @@ function OrderModal({ service, onClose }: { service: ServiceItem; onClose: () =>
         budget: form.budget,
         details: form.details,
         status: 'New',
+        user_id: user?.id,
       },
     ])
 

@@ -24,6 +24,7 @@ export function Navbar() {
     { href: '/team', label: 'Team' },
     { href: '/contact', label: 'Contact' },
     { href: '/products', label: 'Products' },
+    { href: '/my-orders', label: 'My Orders' },
   ]
 
   return (
