@@ -5,8 +5,9 @@
 
 -- =============================================
 -- 1. ORDERS table
--- Used by: components/sections/ServicesPricingSection.tsx (insert)
---          app/admin/page.tsx (select, update status)
+-- Used by:
+--   components/sections/ServicesPricingSection.tsx (insert)
+--   app/admin/page.tsx (select, update status)
 -- =============================================
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
@@ -25,19 +26,22 @@ create table if not exists public.orders (
 
 alter table public.orders enable row level security;
 
--- Anyone (visitors) can submit an order
+-- Anyone (including anonymous visitors) can submit an order
+drop policy if exists "Allow anon insert orders" on public.orders;
 create policy "Allow anon insert orders"
   on public.orders for insert
   to anon, authenticated
   with check (true);
 
 -- Admins (authenticated) can view orders
+drop policy if exists "Allow anon select orders" on public.orders;
 create policy "Allow anon select orders"
   on public.orders for select
   to anon, authenticated
   using (true);
 
--- Admins (authenticated) can update order status
+-- Authenticated users (admins) can update order status
+drop policy if exists "Allow authenticated update orders" on public.orders;
 create policy "Allow authenticated update orders"
   on public.orders for update
   to authenticated
@@ -45,7 +49,7 @@ create policy "Allow authenticated update orders"
 
 -- =============================================
 -- 2. TEAMS table
--- Used by: app/admin/teams/page.tsx (select, upsert)
+--    Used by: app/admin/teams/page.tsx (select, upsert)
 -- =============================================
 create table if not exists public.teams (
   id text primary key,
@@ -57,13 +61,21 @@ create table if not exists public.teams (
 alter table public.teams enable row level security;
 
 -- Read teams
+drop policy if exists "Allow anon select teams" on public.teams;
 create policy "Allow anon select teams"
   on public.teams for select
   to anon, authenticated
   using (true);
 
--- Admins (authenticated) can upsert teams
-create policy "Allow authenticated upsert teams"
-  on public.teams for upsert
+-- Authenticated users (admins) can insert/update (upsert = insert + update)
+drop policy if exists "Allow authenticated insert teams" on public.teams;
+create policy "Allow authenticated insert teams"
+  on public.teams for insert
+  to authenticated
+  with check (true);
+
+drop policy if exists "Allow authenticated update teams" on public.teams;
+create policy "Allow authenticated update teams"
+  on public.teams for update
   to authenticated
   using (true) with check (true);
