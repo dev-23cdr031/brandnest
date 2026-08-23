@@ -4,6 +4,10 @@ import { isAdminEmail } from '@/lib/roles'
 
 export async function POST(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Server misconfigured: missing service role key' }, { status: 500 })
+    }
+
     const authHeader = request.headers.get('authorization')
     if (!authHeader?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
