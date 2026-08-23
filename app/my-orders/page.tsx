@@ -63,12 +63,15 @@ export default function MyOrdersPage() {
         return
       }
 
-      setUserEmail(user.email ?? '')
+      const email = user.email ?? ''
+      setUserEmail(email)
       setChecking(false)
 
+      // Only fetch orders belonging to this user (by email or user_id)
       const { data, error } = await supabase
         .from('orders')
         .select('*')
+        .or(`user_id.eq.${user.id},email.eq.${email}`)
         .order('created_at', { ascending: false })
 
       if (error) {
