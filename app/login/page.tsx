@@ -6,16 +6,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
-import { ArrowRight, Loader2, LockKeyhole, ShieldCheck, UserRound } from 'lucide-react'
+import { ArrowRight, Loader2, LockKeyhole, ShieldCheck, Sparkles } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-
-const ADMIN_EMAIL = 'devdharrshans.23csd@kongu.edu'
+import { getRole, getDashboardPath } from '@/lib/roles'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [mode, setMode] = useState<'admin' | 'customer'>('admin')
-  const isAdmin = mode === 'admin'
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [email, setEmail] = useState('')
@@ -26,13 +23,6 @@ function LoginForm() {
     e.preventDefault()
     setError('')
     setLoading(true)
-
-    // Restrict admin login to the authorized admin email only
-    if (isAdmin && email.trim().toLowerCase() !== ADMIN_EMAIL) {
-      setLoading(false)
-      setError('Access denied. Only the authorized admin can access the admin page.')
-      return
-    }
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -47,39 +37,28 @@ function LoginForm() {
     }
 
     if (data.user) {
-      router.push(isAdmin ? '/admin' : '/services')
+      // Dynamically determine the user's role and redirect to their dashboard
+      const role = getRole(data.user.email)
+      const dashboardPath = getDashboardPath(data.user.email)
+      router.push(dashboardPath)
     }
   }
 
   return (
     <section className="rounded-[1.5rem] border border-white/10 bg-white/[0.055] p-5 shadow-[0_30px_100px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:p-8">
-      <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-black/35 p-2">
-        <button
-          type="button"
-          onClick={() => setMode('admin')}
-          className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${isAdmin ? 'bg-red-600 text-white shadow-[0_0_35px_rgba(220,38,38,0.35)]' : 'text-white/65 hover:bg-white/8'}`}
-        >
-          <ShieldCheck className="h-4 w-4" />
-          Admin
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('customer')}
-          className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${!isAdmin ? 'bg-red-600 text-white shadow-[0_0_35px_rgba(220,38,38,0.35)]' : 'text-white/65 hover:bg-white/8'}`}
-        >
-          <UserRound className="h-4 w-4" />
-          Customer
-        </button>
+      <div className="flex items-center gap-3">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/15 text-red-400">
+          <ShieldCheck className="h-6 w-6" />
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-red-300">Secure Access</p>
+          <h2 className="text-2xl font-black text-white">Sign in to Brandnest</h2>
+        </div>
       </div>
 
-      <div className="mt-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-red-300">
-          {isAdmin ? 'Admin Access' : 'Customer Access'}
-        </p>
-        <h2 className="mt-3 text-3xl font-black text-white">
-          {isAdmin ? 'Manage Brandnest orders' : 'View your project account'}
-        </h2>
-      </div>
+      <p className="mt-4 text-sm leading-6 text-white/60">
+        Enter your credentials and we'll automatically route you to your role's dashboard — whether you're an admin, HR manager, CRM manager, tester, developer, or customer.
+      </p>
 
       {signupSuccess && (
         <p className="mt-5 rounded-xl border border-green-400/30 bg-green-500/10 px-4 py-3 text-sm text-green-200">
@@ -95,7 +74,7 @@ function LoginForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder={isAdmin ? 'admin@brandnest.com' : 'you@example.com'}
+            placeholder="you@example.com"
             className="mt-2 w-full rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-red-400"
           />
         </label>
@@ -123,10 +102,25 @@ function LoginForm() {
           className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-700 to-red-500 px-5 py-3.5 font-semibold text-white shadow-[0_20px_70px_rgba(220,38,38,0.32)] transition hover:from-red-600 hover:to-red-400 disabled:opacity-60"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockKeyhole className="h-4 w-4" />}
-          {loading ? 'Signing In...' : isAdmin ? 'Login as Admin' : 'Login as Customer'}
+          {loading ? 'Signing In...' : 'Sign In'}
           {!loading && <ArrowRight className="h-4 w-4" />}
         </button>
       </form>
+
+      <div className="mt-6 rounded-2xl border border-white/10 bg-black/25 p-4">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-red-400" />
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Role-based access</p>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-white/60 sm:grid-cols-3">
+          <span className="rounded-lg bg-white/[0.05] px-2 py-1.5 text-center font-semibold">👑 Admin</span>
+          <span className="rounded-lg bg-white/[0.05] px-2 py-1.5 text-center font-semibold">👥 HR Manager</span>
+          <span className="rounded-lg bg-white/[0.05] px-2 py-1.5 text-center font-semibold">🤝 CRM Manager</span>
+          <span className="rounded-lg bg-white/[0.05] px-2 py-1.5 text-center font-semibold">🐛 Tester</span>
+          <span className="rounded-lg bg-white/[0.05] px-2 py-1.5 text-center font-semibold">💻 Developer</span>
+          <span className="rounded-lg bg-white/[0.05] px-2 py-1.5 text-center font-semibold">🛒 Customer</span>
+        </div>
+      </div>
 
       <p className="mt-6 text-center text-sm text-white/60">
         New to Brandnest?{' '}
@@ -156,7 +150,7 @@ export default function LoginPage() {
             Welcome back to your freelance sanctuary.
           </h2>
           <p className="mt-5 max-w-xl text-lg leading-8 text-white/70">
-            Admins can manage incoming orders, while customers can access their project requests and updates.
+            One login for everyone. We automatically detect your role and route you to the right dashboard — admins manage orders, HR managers track candidates, CRM managers handle clients, testers manage projects, developers track earnings, and customers view their orders.
           </p>
         </section>
 
