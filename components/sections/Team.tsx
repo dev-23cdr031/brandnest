@@ -103,6 +103,127 @@ const teamMembers = [
     image: '/team/photos/divya-dharshini.jpg',
     accent: 'from-red-500 to-zinc-50',
   },
+  {
+    name: 'Roshini M',
+    role: 'DEVELOPER',
+    title: 'Full Stack Developer',
+    skills: ['Web Development', 'API Integration', 'Problem Solving'],
+    bio: 'Building reliable end-to-end digital experiences for every project.',
+    email: undefined,
+    linkedin: undefined,
+    image: '/team/photos/roshini-m.jpg',
+    accent: 'from-red-300 to-white',
+  },
+  {
+    name: 'Ranjith NB',
+    role: 'DEVELOPER',
+    title: 'Full Stack Developer',
+    skills: ['Web Development', 'API Integration', 'Problem Solving'],
+    bio: 'Building reliable end-to-end digital experiences for every project.',
+    email: undefined,
+    linkedin: undefined,
+    image: '/team/photos/ranjith-nb.jpg',
+    accent: 'from-white to-red-300',
+  },
+  {
+    name: 'Rhea',
+    role: 'HR MANAGER',
+    title: 'HR Manager & Full Stack Developer',
+    skills: ['People Operations', 'Web Development', 'Team Coordination'],
+    bio: 'Supporting the team through people operations and full stack development.',
+    email: undefined,
+    linkedin: undefined,
+    image: '/team/photos/rhea.jpg',
+    accent: 'from-red-400 to-zinc-100',
+  },
+  {
+    name: 'Ridhesha',
+    role: 'DEVELOPER',
+    title: 'Full Stack Developer',
+    skills: ['Web Development', 'API Integration', 'Problem Solving'],
+    bio: 'Building reliable end-to-end digital experiences for every project.',
+    email: undefined,
+    linkedin: undefined,
+    image: '/team/photos/ridhesha.jpg',
+    accent: 'from-white to-red-300',
+  },
+  {
+    name: 'Pushparajan',
+    role: 'CRM',
+    title: 'Customer Relationship Manager',
+    skills: ['Client Relations', 'Communication', 'Customer Success'],
+    bio: 'Creating strong client relationships and ensuring a smooth customer experience.',
+    email: undefined,
+    linkedin: undefined,
+    image: '/team/photos/pushparajan.jpg',
+    accent: 'from-red-500 to-rose-100',
+  },
+  {
+    name: 'Prakalya SB',
+    role: 'DEVELOPER',
+    title: 'Full Stack Developer',
+    skills: ['Web Development', 'API Integration', 'Problem Solving'],
+    bio: 'Building reliable end-to-end digital experiences for every project.',
+    email: undefined,
+    linkedin: undefined,
+    image: '/team/photos/prakalya-sb.jpg',
+    accent: 'from-red-300 to-white',
+  },
+  {
+    name: 'Gokul Shankar',
+    role: 'CRM',
+    title: 'Customer Relationship Manager',
+    skills: ['Client Relations', 'Communication', 'Customer Success'],
+    bio: 'Creating strong client relationships and ensuring a smooth customer experience.',
+    email: undefined,
+    linkedin: undefined,
+    image: undefined,
+    accent: 'from-red-500 to-zinc-50',
+  },
+  {
+    name: 'Gokula Varshini K',
+    role: 'DEVELOPER',
+    title: 'Full Stack Developer',
+    skills: ['Web Development', 'API Integration', 'Problem Solving'],
+    bio: 'Building reliable end-to-end digital experiences for every project.',
+    email: undefined,
+    linkedin: undefined,
+    image: undefined,
+    accent: 'from-white to-red-300',
+  },
+  {
+    name: 'Nadhin',
+    role: 'CRM',
+    title: 'Customer Relationship Manager',
+    skills: ['Client Relations', 'Communication', 'Customer Success'],
+    bio: 'Creating strong client relationships and ensuring a smooth customer experience.',
+    email: undefined,
+    linkedin: undefined,
+    image: '/team/photos/nadhin.jpg',
+    accent: 'from-red-400 to-zinc-100',
+  },
+  {
+    name: 'Dhavanithi M',
+    role: 'HR',
+    title: 'HR Manager',
+    skills: ['People Operations', 'Team Coordination', 'Communication'],
+    bio: 'Supporting a positive and well-coordinated team experience.',
+    email: undefined,
+    linkedin: undefined,
+    image: undefined,
+    accent: 'from-white to-red-300',
+  },
+  {
+    name: 'Manju Sri',
+    role: 'TESTER',
+    title: 'Project Tester',
+    skills: ['Quality Assurance', 'Testing', 'Problem Solving'],
+    bio: 'Helping ensure each project is polished, reliable, and ready to launch.',
+    email: undefined,
+    linkedin: undefined,
+    image: undefined,
+    accent: 'from-red-500 to-rose-100',
+  },
 ]
 
 const cultureCards = [
@@ -138,7 +259,7 @@ const clientLove = [
 ]
 
 const counters = [
-  { value: 7, suffix: '', label: 'Core Specialists' },
+  { value: 18, suffix: '', label: 'Core Specialists' },
   { value: 18, suffix: '+', label: 'Skill Domains' },
   { value: 100, suffix: '%', label: 'Team Energy' },
 ]
@@ -235,13 +356,19 @@ function TeamCard({ member, index }: { member: (typeof teamMembers)[number]; ind
       </div>
 
       <div className="relative overflow-hidden rounded-[1rem] border border-white/10 bg-black/50">
-        <Image
-          src={member.image}
-          alt={`${member.name} professional portrait`}
-          width={800}
-          height={920}
-          className="h-80 w-full object-cover transition duration-700 group-hover:scale-110 sm:h-96 lg:h-80 xl:h-96"
-        />
+        {member.image ? (
+          <Image
+            src={member.image}
+            alt={`${member.name} professional portrait`}
+            width={800}
+            height={920}
+            className="h-80 w-full object-cover transition duration-700 group-hover:scale-110 sm:h-96 lg:h-80 xl:h-96"
+          />
+        ) : (
+          <div className="flex h-80 w-full items-center justify-center bg-gradient-to-br from-red-950 via-zinc-900 to-black sm:h-96 lg:h-80 xl:h-96">
+            <span className="text-7xl font-black tracking-tight text-red-200/90">{member.name.slice(0, 1)}</span>
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/12 to-transparent" />
         {'age' in member && member.age ? (
           <div className="absolute left-4 top-4 rounded-full border border-white/15 bg-black/45 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-md">
@@ -260,24 +387,20 @@ function TeamCard({ member, index }: { member: (typeof teamMembers)[number]; ind
             <h3 className="text-2xl font-black leading-tight text-white">{member.name}</h3>
             <p className="mt-2 text-sm font-bold leading-6 text-red-300">{member.title}</p>
           </div>
-          <div className="flex shrink-0 gap-2">
-            <a
-              href={member.linkedin}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`${member.name} LinkedIn`}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/8 text-white transition hover:border-red-300/50 hover:bg-red-500/20 hover:text-white"
-            >
-              <Globe2 className="h-4 w-4" />
-            </a>
-            <a
-              href={`mailto:${member.email}`}
-              aria-label={`Email ${member.name}`}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/8 text-white transition hover:border-red-300/50 hover:bg-red-500/20 hover:text-white"
-            >
-              <Mail className="h-4 w-4" />
-            </a>
-          </div>
+          {(member.linkedin || member.email) && (
+            <div className="flex shrink-0 gap-2">
+              {member.linkedin && (
+                <a href={member.linkedin} target="_blank" rel="noreferrer" aria-label={`${member.name} LinkedIn`} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/8 text-white transition hover:border-red-300/50 hover:bg-red-500/20 hover:text-white">
+                  <Globe2 className="h-4 w-4" />
+                </a>
+              )}
+              {member.email && (
+                <a href={`mailto:${member.email}`} aria-label={`Email ${member.name}`} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/8 text-white transition hover:border-red-300/50 hover:bg-red-500/20 hover:text-white">
+                  <Mail className="h-4 w-4" />
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
         <p className="mt-4 min-h-14 text-sm leading-6 text-white/70">{member.bio}</p>

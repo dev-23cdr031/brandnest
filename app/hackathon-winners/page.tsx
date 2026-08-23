@@ -28,12 +28,20 @@ const winners: Winner[] = [
   { rank: 3, prize: '₹3,000', teamName: 'The Fighters', members: ['Samyuktha K', 'Nithin', 'Tarun K'], emoji: '🥉' },
   { rank: 4, prize: '₹1,500', teamName: 'Vector Dubs', members: ['Vijay Tharun', 'Vikas', 'Nishaliya K'], emoji: '🎖️' },
   { rank: 5, prize: '₹1,000', teamName: 'Infiners', members: ['Gokul M', 'Sharan K'], emoji: '🎖️' },
-  { rank: 6, prize: '₹800', teamName: 'Ctrl Freaks', members: ['Ridhesha', 'Ranjith'], emoji: '🎖️' },
-  { rank: 7, prize: '₹700', teamName: 'Trinity', members: ['Prashana S', 'Priyadharshini S', 'Hanshikaa S'], emoji: '🎖️' },
-  { rank: 8, prize: '₹600', teamName: 'Tech Vibe', members: ['Bhavana Sri G', 'Ashwitha R'], emoji: '🎖️' },
-  { rank: 9, prize: '₹500', teamName: 'Algnite', members: ['Nadhin P', 'Rhea R', 'Pranavdhanh C'], emoji: '🎖️' },
-  { rank: 10, prize: '₹500', teamName: 'Brain Spark', members: ['Shavishna A', 'Srinickitha S', 'Shivasakthi M'], emoji: '🎖️' },
+  { rank: 6, prize: 'Certificate of Recognition', teamName: 'Ctrl Freaks', members: ['Ridhesha', 'Ranjith'], emoji: '🎖️' },
+  { rank: 7, prize: 'Certificate of Recognition', teamName: 'Trinity', members: ['Prashana S', 'Priyadharshini S', 'Hanshikaa S'], emoji: '🎖️' },
+  { rank: 8, prize: 'Certificate of Recognition', teamName: 'Tech Vibe', members: ['Bhavana Sri G', 'Ashwitha R'], emoji: '🎖️' },
+  { rank: 9, prize: 'Certificate of Recognition', teamName: 'Algnite', members: ['Nadhin P', 'Rhea R', 'Pranavdhanh C'], emoji: '🎖️' },
+  { rank: 10, prize: 'Certificate of Recognition', teamName: 'Brain Spark', members: ['Shavishna A', 'Srinickitha S', 'Shivasakthi M'], emoji: '🎖️' },
 ]
+
+const particles = Array.from({ length: 20 }, (_, index) => ({
+  left: `${(index * 37 + 11) % 100}%`,
+  top: `${(index * 53 + 7) % 100}%`,
+  size: `${(index % 6) + 2}px`,
+  duration: `${(index % 6) + 4}s`,
+  delay: `${index % 5}s`,
+}))
 
 export default function HackathonWinnersPage() {
   const [mounted, setMounted] = useState(false)
@@ -56,16 +64,16 @@ export default function HackathonWinnersPage() {
 
       {/* Floating particles */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+        {particles.map((particle, i) => (
           <span
             key={i}
             className="absolute rounded-full bg-amber-400/20"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              width: `${Math.random() * 6 + 2}px`,
-              height: `${Math.random() * 6 + 2}px`,
-              animation: `float ${Math.random() * 6 + 4}s infinite ease-in-out ${Math.random() * 5}s`,
+              left: particle.left,
+              top: particle.top,
+              width: particle.size,
+              height: particle.size,
+              animation: `float ${particle.duration} infinite ease-in-out ${particle.delay}`,
             }}
           />
         ))}

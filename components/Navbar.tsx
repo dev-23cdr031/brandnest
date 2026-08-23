@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Trophy } from 'lucide-react'
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -24,6 +24,7 @@ export function Navbar() {
     { href: '/team', label: 'Team' },
     { href: '/contact', label: 'Contact' },
     { href: '/products', label: 'Products' },
+    { href: '/hackathon-winners', label: 'Hackathon Winners', highlight: true },
     { href: '/my-orders', label: 'My Orders' },
   ]
 
@@ -44,17 +45,20 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`text-sm font-medium transition-colors ${
-                  isScrolled
-                    ? 'text-gray-700 hover:text-red-600'
-                    : 'text-white hover:text-primary-300'
+                  link.highlight
+                    ? 'inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5 text-amber-600 font-bold hover:bg-amber-500/20'
+                    : isScrolled
+                      ? 'text-gray-700 hover:text-red-600'
+                      : 'text-white hover:text-primary-300'
                 }`}
               >
+                {link.highlight && <Trophy className="h-3.5 w-3.5" />}
                 {link.label}
               </Link>
             ))}
@@ -89,9 +93,14 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  className={`block px-3 py-2 rounded-lg transition-colors ${
+                    link.highlight
+                      ? 'bg-amber-50 text-amber-700 font-bold'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
                   onClick={() => setIsOpen(false)}
                 >
+                  {link.highlight && <Trophy className="mr-1.5 inline h-4 w-4" />}
                   {link.label}
                 </Link>
               ))}
