@@ -1,299 +1,44 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import {
-  ArrowLeft,
-  Award,
-  Flame,
-  Rocket,
-  Sparkles,
-  Star,
-  Trophy,
-  Users,
-  Zap,
-} from 'lucide-react'
+import { ArrowLeft, Award, Flame, Rocket, Sparkles, Star, Trophy, Users, Zap } from 'lucide-react'
 
-type Winner = {
-  rank: number
-  prize: string
-  teamName: string
-  members: string[]
-  emoji: string
-}
+type Winner = { rank: number; prize: string; teamName: string; members: string[]; emoji: string }
 
 const winners: Winner[] = [
   { rank: 1, prize: '₹10,000', teamName: 'Yurt', members: ['Sanjay T', 'Santhosh A', 'Miralani R'], emoji: '🥇' },
   { rank: 2, prize: '₹5,000', teamName: 'The Giants', members: ['Vaishnavi M', 'Likitha G'], emoji: '🥈' },
   { rank: 3, prize: '₹3,000', teamName: 'The Fighters', members: ['Samyuktha K', 'Nithin', 'Tarun K'], emoji: '🥉' },
-  { rank: 4, prize: '₹1,500', teamName: 'Vector Dubs', members: ['Vijay Tharun', 'Vikas', 'Nishaliya K'], emoji: '🎖️' },
-  { rank: 5, prize: '₹1,000', teamName: 'Infiners', members: ['Gokul M', 'Sharan K'], emoji: '🎖️' },
-  { rank: 6, prize: 'Certificate of Recognition', teamName: 'Ctrl Freaks', members: ['Ridhesha', 'Ranjith'], emoji: '🎖️' },
-  { rank: 7, prize: 'Certificate of Recognition', teamName: 'Trinity', members: ['Prashana S', 'Priyadharshini S', 'Hanshikaa S'], emoji: '🎖️' },
-  { rank: 8, prize: 'Certificate of Recognition', teamName: 'Tech Vibe', members: ['Bhavana Sri G', 'Ashwitha R'], emoji: '🎖️' },
-  { rank: 9, prize: 'Certificate of Recognition', teamName: 'Algnite', members: ['Nadhin P', 'Rhea R', 'Pranavdhanh C'], emoji: '🎖️' },
-  { rank: 10, prize: 'Certificate of Recognition', teamName: 'Brain Spark', members: ['Shavishna A', 'Srinickitha S', 'Shivasakthi M'], emoji: '🎖️' },
+  { rank: 4, prize: '₹1,500', teamName: 'Vector Dubs', members: ['Vijay Tharun', 'Vikas', 'Nishaliya K'], emoji: '🏅' },
+  { rank: 5, prize: '₹1,000', teamName: 'Infiners', members: ['Gokul M', 'Sharan K'], emoji: '🏅' },
+  { rank: 6, prize: 'Certificate of Recognition', teamName: 'Ctrl Freaks', members: ['Ridhesha', 'Ranjith'], emoji: '🏅' },
+  { rank: 7, prize: 'Certificate of Recognition', teamName: 'Trinity', members: ['Prashana S', 'Priyadharshini S', 'Hanshikaa S'], emoji: '🏅' },
+  { rank: 8, prize: 'Certificate of Recognition', teamName: 'Tech Vibe', members: ['Bhavana Sri G', 'Ashwitha R'], emoji: '🏅' },
+  { rank: 9, prize: 'Certificate of Recognition', teamName: 'Algnite', members: ['Nadhin P', 'Rhea R', 'Pranavdhanh C'], emoji: '🏅' },
+  { rank: 10, prize: 'Certificate of Recognition', teamName: 'Brain Spark', members: ['Shavishna A', 'Srinickitha S', 'Shivasakthi M'], emoji: '🏅' },
 ]
 
-const particles = Array.from({ length: 20 }, (_, index) => ({
-  left: `${(index * 37 + 11) % 100}%`,
-  top: `${(index * 53 + 7) % 100}%`,
-  size: `${(index % 6) + 2}px`,
-  duration: `${(index % 6) + 4}s`,
-  delay: `${index % 5}s`,
-}))
+const particles = Array.from({ length: 16 }, (_, i) => ({ left: `${(i * 29 + 9) % 100}%`, top: `${(i * 47 + 13) % 100}%`, size: `${(i % 4) + 2}px`, duration: `${(i % 5) + 5}s`, delay: `${i % 4}s` }))
 
 export default function HackathonWinnersPage() {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const rest = winners.slice(3)
-
-  return (
-    <main className="min-h-screen overflow-hidden bg-[#050505] text-white">
-      {/* ============ BACKGROUND EFFECTS ============ */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute left-1/2 top-[-20%] h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-amber-500/10 blur-[120px]" />
-        <div className="absolute left-[10%] top-[40%] h-[400px] w-[400px] rounded-full bg-purple-600/10 blur-[100px]" />
-        <div className="absolute right-[10%] top-[60%] h-[400px] w-[400px] rounded-full bg-blue-600/10 blur-[100px]" />
-        <div className="absolute left-1/2 bottom-[-10%] h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-amber-600/5 blur-[120px]" />
-      </div>
-
-      {/* Floating particles */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        {particles.map((particle, i) => (
-          <span
-            key={i}
-            className="absolute rounded-full bg-amber-400/20"
-            style={{
-              left: particle.left,
-              top: particle.top,
-              width: particle.size,
-              height: particle.size,
-              animation: `float ${particle.duration} infinite ease-in-out ${particle.delay}`,
-            }}
-          />
-        ))}
-        <style>{`
-          @keyframes float {
-            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
-            50% { transform: translateY(-30px) translateX(15px); opacity: 1; }
-          }
-          @keyframes shine {
-            0%, 100% { background-position: 200% center; }
-            50% { background-position: -200% center; }
-          }
-          @keyframes glowPulse {
-            0%, 100% { box-shadow: 0 0 60px rgba(251, 191, 36, 0.3); }
-            50% { box-shadow: 0 0 100px rgba(251, 191, 36, 0.6); }
-          }
-          .gold-text {
-            background: linear-gradient(90deg, #fbbf24, #fef3c7, #f59e0b, #fbbf24);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 4s linear infinite;
-          }
-          .podium-glow {
-            animation: glowPulse 3s ease-in-out infinite;
-          }
-        `}</style>
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-6 lg:px-8">
-        {/* ============ TOP BAR ============ */}
-        <header className="flex items-center justify-between gap-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/10"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
-          <div className="flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-amber-300">
-            <Sparkles className="h-4 w-4" />
-            2026 Hackathon
-          </div>
-        </header>
-
-        {/* ============ HERO ============ */}
-        <section className="relative mt-14 text-center">
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-5 py-2 text-xs font-bold uppercase tracking-[0.35em] text-amber-300">
-            <Trophy className="h-4 w-4" />
-            Winners Announcement
-          </div>
-
-          <h1 className="gold-text mx-auto mt-8 text-5xl font-black leading-tight sm:text-7xl lg:text-8xl">
-            Hackathon 2026
-          </h1>
-          <p className="mx-auto mt-2 max-w-3xl text-lg font-black text-white sm:text-2xl">
-            🏆 The Champions of Innovation
-          </p>
-
-          <div className="mx-auto mt-6 flex max-w-xl items-center justify-center gap-6 text-white/70">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-amber-400" />
-              <span className="text-2xl font-black text-white">27</span>
-              <span className="text-sm">Participants</span>
-            </div>
-            <div className="h-8 w-px bg-white/10" />
-            <div className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-amber-400" />
-              <span className="text-2xl font-black text-white">10</span>
-              <span className="text-sm">Winning Teams</span>
-            </div>
-            <div className="h-8 w-px bg-white/10" />
-            <div className="flex items-center gap-2">
-              <Flame className="h-5 w-5 text-amber-400" />
-              <span className="text-sm">2026</span>
-            </div>
-          </div>
-
-          <div className="mx-auto mt-8 flex flex-wrap items-center justify-center gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/5 px-4 py-1.5 text-xs font-semibold text-amber-200/80">
-              <Zap className="h-3.5 w-3.5" /> Build
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-400/20 bg-purple-500/5 px-4 py-1.5 text-xs font-semibold text-purple-200/80">
-              <Rocket className="h-3.5 w-3.5" /> Compete
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-400/20 bg-blue-500/5 px-4 py-1.5 text-xs font-semibold text-blue-200/80">
-              <Star className="h-3.5 w-3.5" /> Win
-            </span>
-          </div>
-        </section>
-
-        {/* ============ TOP 3 PODIUM ============ */}
-        <section className="mt-20">
-          <h2 className="text-center text-3xl font-black text-white sm:text-4xl">
-            🏆 Top 3 <span className="gold-text">Champions</span>
-          </h2>
-          <p className="mt-2 text-center text-white/50">The brightest minds who conquered the challenge</p>
-
-          <div className={`mt-12 grid items-end gap-6 sm:grid-cols-3 ${mounted ? 'opacity-100 transition-opacity duration-700' : 'opacity-0'}`}>
-            {/* 2nd place - left */}
-            <div className="order-2 sm:order-1">
-              <PodiumCard winner={winners[1]} height="h-56" />
-            </div>
-
-            {/* 1st place - center (bigger) */}
-            <div className="order-1 sm:order-2">
-              <div className="podium-glow relative rounded-3xl border-2 border-amber-400/40 bg-gradient-to-b from-amber-950/30 via-black/40 to-black/60 p-6 sm:p-8">
-                <div className="absolute -top-14 left-1/2 -translate-x-1/2 text-6xl drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]">👑</div>
-                <div className="mt-10 text-center">
-                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600 text-4xl shadow-[0_0_30px_rgba(251,191,36,0.4)]">🥇</div>
-                  <div className="gold-text mt-5 text-4xl font-black sm:text-5xl">1st Prize</div>
-                  <h3 className="mt-2 text-3xl font-black text-white sm:text-4xl">{winners[0].teamName}</h3>
-                  <p className="mt-1 text-lg font-bold text-amber-300">{winners[0].prize}</p>
-                  <div className="mt-4 flex flex-wrap justify-center gap-2">
-                    {winners[0].members.map((member) => (
-                      <span key={member} className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-sm font-semibold text-amber-200">
-                        {member}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="mx-auto h-8 w-48 rounded-t-none rounded-b-2xl bg-gradient-to-b from-amber-600/40 to-amber-900/20" />
-            </div>
-
-            {/* 3rd place - right */}
-            <div className="order-3">
-              <PodiumCard winner={winners[2]} height="h-48" />
-            </div>
-          </div>
-        </section>
-
-        {/* ============ RANKS 4-10 ============ */}
-        <section className="mt-16">
-          <h2 className="text-center text-3xl font-black text-white sm:text-4xl">
-            🎉 All <span className="gold-text">Winners</span>
-          </h2>
-          <p className="mt-2 text-center text-white/50">Congratulations to every team that made it!</p>
-
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {rest.map((winner, index) => (
-              <div
-                key={winner.rank}
-                className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-white/[0.06] ${
-                  mounted ? 'opacity-100 transition-all duration-700' : 'opacity-0'
-                }`}
-                style={{ transitionDelay: `${index * 80}ms` }}
-              >
-                <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-amber-500/5 blur-2xl transition group-hover:bg-amber-500/15" />
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 text-2xl font-black text-white">
-                      #{winner.rank}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-black text-white">{winner.teamName}</h3>
-                      <p className="text-sm font-bold text-amber-300/90">{winner.prize}</p>
-                    </div>
-                  </div>
-                  <span className="text-2xl">{winner.emoji}</span>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {winner.members.map((member) => (
-                    <span
-                      key={member}
-                      className="rounded-full border border-white/10 bg-black/30 px-2.5 py-1 text-xs font-semibold text-white/70 transition group-hover:border-amber-400/20 group-hover:text-white/90"
-                    >
-                      {member}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ============ FOOTER CTA ============ */}
-        <section className="mt-20 rounded-3xl border border-white/10 bg-gradient-to-br from-red-950/30 to-black/40 p-10 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-500/10">
-            <Trophy className="h-8 w-8 text-amber-400" />
-          </div>
-          <h3 className="mt-6 text-3xl font-black text-white">Congratulations 🎉</h3>
-          <p className="mx-auto mt-3 max-w-2xl text-white/60">
-            Every team showed incredible creativity and hard work. This is just the beginning — keep building, keep innovating, and keep winning!
-          </p>
-        </section>
-      </div>
-    </main>
-  )
+  const [champion, second, third, ...rest] = winners
+  return <main className="relative min-h-screen overflow-x-clip bg-[#060607] text-white">
+    <style>{`@keyframes drift{0%,100%{transform:translate3d(0,0,0);opacity:.2}50%{transform:translate3d(10px,-24px,0);opacity:.8}}@keyframes gold-shimmer{0%,100%{background-position:180% center}50%{background-position:-80% center}}.gold-text{background:linear-gradient(90deg,#f59e0b,#fef3c7,#fbbf24,#d97706);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gold-shimmer 6s ease-in-out infinite}@media (prefers-reduced-motion:reduce){.gold-text,.hackathon-particle{animation:none!important}}`}</style>
+    <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden"><div className="absolute left-1/2 top-[-18rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-amber-500/[0.12] blur-[120px]" /><div className="absolute -left-48 top-[34rem] h-[28rem] w-[28rem] rounded-full bg-purple-700/[0.13] blur-[120px]" /><div className="absolute -right-48 top-[52rem] h-[28rem] w-[28rem] rounded-full bg-red-700/[0.1] blur-[120px]" />{particles.map((p, i) => <span key={i} className="hackathon-particle absolute rounded-full bg-amber-300/40" style={{ left: p.left, top: p.top, width: p.size, height: p.size, animation: `drift ${p.duration} ease-in-out ${p.delay} infinite` }} />)}</div>
+    <div aria-hidden className="pointer-events-none absolute inset-x-0 top-[30rem] h-[42rem] opacity-40 [background-image:linear-gradient(90deg,transparent_0%,rgba(251,191,36,.12)_49.8%,rgba(251,191,36,.12)_50.2%,transparent_100%),repeating-linear-gradient(0deg,transparent_0,transparent_5.5rem,rgba(255,255,255,.045)_5.55rem,rgba(255,255,255,.045)_5.6rem)] [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_80%,transparent)]" />
+    <div className="relative mx-auto w-full max-w-7xl px-4 pb-14 pt-4 sm:px-6 sm:pb-20 sm:pt-7 lg:px-8">
+      <header className="flex flex-col items-stretch justify-between gap-3 min-[440px]:flex-row min-[440px]:items-center"><Link href="/" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.055] px-4 py-2.5 text-sm font-semibold text-white/85 transition hover:border-white/25 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-300/80"><ArrowLeft className="h-4 w-4" />Back to Home</Link><div className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-400/20 bg-amber-500/[0.09] px-4 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-amber-200"><Sparkles className="h-4 w-4" />2026 Hackathon</div></header>
+      <section className="mx-auto mt-12 max-w-4xl text-center sm:mt-16"><div className="inline-flex max-w-full items-center justify-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/[0.1] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-amber-200 sm:px-5 sm:text-xs sm:tracking-[0.28em]"><Trophy className="h-4 w-4 shrink-0" />Winners Announcement</div><h1 className="gold-text mt-5 text-4xl font-black leading-[0.96] tracking-tight sm:mt-7 sm:text-6xl lg:text-8xl">Hackathon 2026</h1><p className="mt-3 text-base font-bold text-white sm:text-xl lg:text-2xl">🏆 The Champions of Innovation</p><dl className="mx-auto mt-7 grid max-w-2xl grid-cols-3 divide-x divide-white/10 rounded-2xl border border-white/[0.09] bg-white/[0.035] px-1 py-4 sm:mt-9 sm:px-4 sm:py-5"><Metric icon={<Users />} value="27" label="Participants" /><Metric icon={<Award />} value="10" label="Winning Teams" /><Metric icon={<Flame />} value="2026" label="Season" /></dl><div className="mt-6 flex flex-wrap justify-center gap-2 sm:gap-3"><Pill icon={<Zap />} tone="amber" label="Build" /><Pill icon={<Rocket />} tone="violet" label="Compete" /><Pill icon={<Star />} tone="blue" label="Win" /></div></section>
+      <section className="mt-16 sm:mt-24" aria-labelledby="top-three"><SectionHeading id="top-three" eyebrow="Final standings" title={<>Top 3 <span className="gold-text">Champions</span></>} description="The brightest minds who conquered the challenge." /><div className="mx-auto mt-7 flex max-w-5xl items-center gap-3 text-[10px] font-bold uppercase tracking-[0.22em] text-amber-200/55 sm:mt-9"><span className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-300/50" />Brandnest Awards<span className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-300/50" /></div><div className="mx-auto mt-5 grid max-w-5xl grid-cols-1 gap-5 sm:mt-7 sm:grid-cols-3 sm:items-end sm:gap-4 lg:gap-6"><div className="order-2 sm:order-1"><PodiumCard winner={second} /></div><div className="order-1 sm:order-2"><ChampionCard winner={champion} /></div><div className="order-3"><PodiumCard winner={third} /></div></div></section>
+      <section className="mt-16 sm:mt-24" aria-labelledby="all-winners"><SectionHeading id="all-winners" eyebrow="Every idea mattered" title={<>All <span className="gold-text">Winners</span></>} description="Congratulations to every team that made it." /><div className="mt-8 grid grid-cols-1 gap-4 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">{rest.map(winner => <RankCard key={winner.rank} winner={winner} />)}</div></section>
+      <section className="mt-16 border-y border-white/[0.09] bg-gradient-to-r from-red-950/25 via-white/[0.035] to-purple-950/25 px-5 py-12 text-center sm:mt-24 sm:px-10 sm:py-16"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/10"><Trophy className="h-7 w-7 text-amber-300" /></div><h2 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">Congratulations 🎉</h2><p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/65 sm:text-base">Every team showed incredible creativity and hard work. This is just the beginning — keep building, keep innovating, and keep winning!</p></section>
+    </div></main>
 }
 
-function PodiumCard({ winner, height }: { winner: Winner; height: string }) {
-  const isSecond = winner.rank === 2
-  const accent = isSecond
-    ? { border: 'border-gray-300/40', bg: 'bg-gradient-to-b from-slate-400/10 to-black/40', text: 'text-slate-200', prize: 'text-slate-300', badge: 'bg-slate-400/10', member: 'border-slate-300/20 bg-slate-400/10 text-slate-200' }
-    : { border: 'border-orange-400/40', bg: 'bg-gradient-to-b from-orange-500/10 to-black/40', text: 'text-orange-200', prize: 'text-orange-300', badge: 'bg-orange-500/10', member: 'border-orange-400/20 bg-orange-500/10 text-orange-200' }
-
-  return (
-    <div className={`${height} flex flex-col justify-end`}>
-      <div className={`rounded-3xl border-2 ${accent.border} ${accent.bg} p-6`}>
-        <div className="text-center">
-          <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${accent.badge} text-3xl`}>
-            {winner.rank === 2 ? '🥈' : '🥉'}
-          </div>
-          <div className={`mt-3 text-2xl font-black ${accent.text}`}>
-            {winner.rank === 2 ? '2nd Prize' : '3rd Prize'}
-          </div>
-          <h3 className="mt-1 text-xl font-black text-white sm:text-2xl">{winner.teamName}</h3>
-          <p className={`mt-0.5 font-bold ${accent.prize}`}>{winner.prize}</p>
-          <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-            {winner.members.map((member) => (
-              <span key={member} className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${accent.member}`}>
-                {member}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className={`mx-auto h-6 w-2/3 rounded-t-none rounded-b-2xl ${isSecond ? 'bg-slate-500/20' : 'bg-orange-600/20'}`} />
-    </div>
-  )
-}
+function Metric({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) { return <div className="flex min-w-0 flex-col items-center gap-1 px-2 text-center"><span className="text-amber-300 [&>svg]:h-4 [&>svg]:w-4">{icon}</span><dd className="text-base font-black leading-none text-white sm:text-2xl">{value}</dd><dt className="text-[10px] font-medium leading-tight text-white/55 sm:text-xs">{label}</dt></div> }
+function Pill({ icon, tone, label }: { icon: React.ReactNode; tone: 'amber' | 'violet' | 'blue'; label: string }) { const styles = { amber: 'border-amber-400/20 bg-amber-500/[0.08] text-amber-100', violet: 'border-purple-400/20 bg-purple-500/[0.08] text-purple-100', blue: 'border-sky-400/20 bg-sky-500/[0.08] text-sky-100' }; return <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${styles[tone]}`}><span className="[&>svg]:h-3.5 [&>svg]:w-3.5">{icon}</span>{label}</span> }
+function SectionHeading({ id, eyebrow, title, description }: { id: string; eyebrow: string; title: React.ReactNode; description: string }) { return <div className="text-center"><p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-300/80 sm:text-xs">{eyebrow}</p><h2 id={id} className="mt-2 text-2xl font-black tracking-tight sm:text-4xl">{title}</h2><p className="mt-2 text-sm text-white/55 sm:text-base">{description}</p></div> }
+function ChampionCard({ winner }: { winner: Winner }) { return <article className="relative overflow-hidden rounded-3xl border border-amber-300/40 bg-[linear-gradient(145deg,rgba(120,72,5,.58),rgba(29,20,5,.78)_45%,rgba(5,5,6,.94))] p-5 shadow-[0_0_55px_rgba(245,158,11,.18)] sm:p-6 lg:p-8"><div aria-hidden className="absolute -right-12 -top-16 h-48 w-48 rounded-full bg-amber-300/20 blur-3xl" /><div className="relative text-center"><span className="text-4xl drop-shadow-[0_0_14px_rgba(251,191,36,.65)] sm:text-5xl">👑</span><div className="mx-auto mt-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-100 via-amber-400 to-amber-600 text-3xl shadow-lg shadow-amber-500/30">{winner.emoji}</div><p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-amber-100/80">First place</p><h3 className="mt-1 break-words text-3xl font-black tracking-tight sm:text-4xl">{winner.teamName}</h3><p className="mt-2 text-xl font-black text-amber-200 sm:text-2xl">{winner.prize}</p><MemberChips members={winner.members} tone="gold" /></div></article> }
+function PodiumCard({ winner }: { winner: Winner }) { const second = winner.rank === 2; const style = second ? 'border-slate-300/30 bg-gradient-to-b from-slate-300/[0.12] to-white/[0.035] text-slate-100' : 'border-orange-300/30 bg-gradient-to-b from-orange-500/[0.13] to-white/[0.035] text-orange-100'; return <article className={`h-full rounded-3xl border p-5 sm:p-6 ${style}`}><div className="text-center"><span className="text-3xl">{winner.emoji}</span><p className="mt-3 text-xs font-bold uppercase tracking-[0.17em] opacity-80">{second ? 'Second place' : 'Third place'}</p><h3 className="mt-1 break-words text-xl font-black text-white sm:text-2xl">{winner.teamName}</h3><p className="mt-1 text-base font-bold">{winner.prize}</p><MemberChips members={winner.members} tone={second ? 'silver' : 'bronze'} /></div></article> }
+function RankCard({ winner }: { winner: Winner }) { return <article className="group min-w-0 rounded-2xl border border-white/[0.09] bg-white/[0.04] p-4 transition duration-200 hover:border-amber-300/30 hover:bg-white/[0.065] sm:p-5"><div className="flex min-w-0 items-start gap-3"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-sm font-black text-amber-200">#{winner.rank}</span><div className="min-w-0 flex-1"><div className="flex min-w-0 items-start justify-between gap-2"><h3 className="break-words text-base font-black leading-tight text-white sm:text-lg">{winner.teamName}</h3><span className="shrink-0 text-xl" aria-hidden>{winner.emoji}</span></div><p className="mt-1 break-words text-xs font-bold leading-snug text-amber-200/90 sm:text-sm">{winner.prize}</p></div></div><MemberChips members={winner.members} tone="neutral" /></article> }
+function MemberChips({ members, tone }: { members: string[]; tone: 'gold' | 'silver' | 'bronze' | 'neutral' }) { const styles = { gold: 'border-amber-200/25 bg-amber-300/10 text-amber-50', silver: 'border-slate-200/20 bg-slate-300/10 text-slate-100', bronze: 'border-orange-200/20 bg-orange-300/10 text-orange-50', neutral: 'border-white/10 bg-black/20 text-white/70' }; return <div className="mt-4 flex flex-wrap justify-center gap-1.5">{members.map(member => <span key={member} className={`max-w-full break-words rounded-full border px-2.5 py-1 text-xs font-medium leading-tight ${styles[tone]}`}>{member}</span>)}</div> }
