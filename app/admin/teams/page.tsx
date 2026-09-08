@@ -23,6 +23,9 @@ type Member = {
   id: string
   name: string
   points: number
+  isTeamLead?: boolean
+  onBreak?: boolean
+  breakReturnDays?: number
 }
 
 type Team = {
@@ -43,7 +46,7 @@ const initialTeams: Team[] = [
       { id: 't1m1', name: 'Ranjith', points: 0 },
       { id: 't1m2', name: 'Manju Shri', points: 0 },
       { id: 't1m3', name: 'Gokul Shankar', points: 0 },
-      { id: 't1m4', name: 'Priyanka', points: 0 },
+      { id: 't1m4', name: 'Priyanka', points: 0, isTeamLead: true },
     ],
   },
   {
@@ -53,12 +56,12 @@ const initialTeams: Team[] = [
     weeksWins: 0,
     members: [
       { id: 't2m1', name: 'Prakalya', points: 0 },
-      { id: 't2m2', name: 'Roshini', points: 0 },
+      { id: 't2m2', name: 'Roshini', points: 0, onBreak: true, breakReturnDays: 22 },
       { id: 't2m3', name: 'Dhavanithi', points: 0 },
       { id: 't2m4', name: 'Pushparajan', points: 0 },
       { id: 't2m5', name: 'gokulavarshini', points: 0 },
       { id: 't2m6', name: 'Devv Sharann', points: 0 },
-      { id: 't2m7', name: 'Nadhin', points: 0 },
+      { id: 't2m7', name: 'Nadhin', points: 0, isTeamLead: true },
     ],
   },
 ]
@@ -72,6 +75,32 @@ export default function AdminTeamsPage() {
   const [saving, setSaving] = useState(false)
   const [addMemberTeam, setAddMemberTeam] = useState<string | null>(null)
   const [newMemberName, setNewMemberName] = useState('')
+  const [countdown, setCountdown] = useState<{[key: string]: number}>({})
+
+  // Countdown timer for members on break
+  useEffect(() => {
+    const updateCountdowns = () => {
+      const newCountdowns: {[key: string]: number} = {}
+      teams.forEach(team => {
+        team.members.forEach(member => {
+          if (member.onBreak && member.breakReturnDays) {
+            // Calculate days remaining (simplified - decreases by 1 each day)
+            const startDate = new Date()
+            const returnDate = new Date(startDate)
+            returnDate.setDate(returnDate.getDate() + member.breakReturnDays)
+            const daysLeft = Math.ceil((returnDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+            newCountdowns[member.id] = Math.max(0, daysLeft)
+          }
+        })
+      })
+      setCountdown(newCountdowns)
+    }
+
+    updateCountdowns()
+    // Update daily
+    const interval = setInterval(updateCountdowns, 86400000)
+    return () => clearInterval(interval)
+  }, [teams])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -322,6 +351,16 @@ export default function AdminTeamsPage() {
                             <p className={`font-semibold ${isTop ? 'text-amber-300' : 'text-white'}`}>
                               {member.name}
                               {isTop && <Crown className="ml-1.5 inline h-4 w-4" />}
+                              {member.isTeamLead && (
+                                <span className={`ml-2 inline-flex items-center gap-1 rounded-full ${accentBg} ${accentText} px-2 py-0.5 text-xs font-bold`}>
+                                  Team Lead
+                                </span>
+                              )}
+                              {member.onBreak && (
+                                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-yellow-500/10 text-yellow-400 px-2 py-0.5 text-xs font-bold">
+                                  On Break - {countdown[member.id] ?? member.breakReturnDays ?? 0}d left
+                                </span>
+                              )}
                             </p>
                             <p className="text-xs text-white/70">{member.points} pts</p>
                           </div>
