@@ -134,11 +134,27 @@ export default function AdminTeamsPage() {
     const loadTeams = async () => {
       const { data, error } = await supabase.from('teams').select('*')
       if (!error && data && data.length > 0) {
-        // Fall back to default week wins if the column/value is missing in the DB
-        const merged = (data as Team[]).map((t) => ({
-          ...t,
-          weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 3 : 0),
-        }))
+        // Fall back to default week wins if the column/value is missing in the DB,
+        // and remove any duplicate members (by name) defensively
+        const merged = (data as Team[]).map((t) => {
+          const seenNames = new Set<string>()
+          const seenIds = new Set<string>()
+          return {
+            ...t,
+            members: (t.members || []).filter((m) => {
+              const key = m.name.trim().toLowerCase()
+              if (seenNames.has(key)) return false
+              seenNames.add(key)
+              return true
+            }).map((m, i) => {
+              let id = m.id
+              if (!id || seenIds.has(id)) id = `${t.id}-m${i}`
+              seenIds.add(id)
+              return { ...m, id }
+            }),
+            weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 3 : 0),
+          }
+        })
         setTeams(merged)
       }
       setLoading(false)

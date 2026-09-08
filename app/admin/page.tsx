@@ -174,12 +174,29 @@ type Team = {
   weeksWins: number
 }
 
-// Fall back to default week wins if the value is missing in the DB
+// Fall back to default week wins if the value is missing in the DB, and
+// defensively remove any duplicate members (by name) so lists can never render twice
 const mergeTeamDefaults = (data: Team[]): Team[] =>
-  data.map((t) => ({
-    ...t,
-    weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 3 : 0),
-  }))
+  data.map((t) => {
+    const seenNames = new Set<string>()
+    const seenIds = new Set<string>()
+    const members = (t.members || []).filter((m) => {
+      const key = m.name.trim().toLowerCase()
+      if (seenNames.has(key)) return false
+      seenNames.add(key)
+      return true
+    }).map((m, i) => {
+      let id = m.id
+      if (!id || seenIds.has(id)) id = `${t.id}-m${i}`
+      seenIds.add(id)
+      return { ...m, id }
+    })
+    return {
+      ...t,
+      members,
+      weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 3 : 0),
+    }
+  })
 
 // Live countdown for members on break
 function BreakCountdown({ member }: { member: TeamMember }) {
