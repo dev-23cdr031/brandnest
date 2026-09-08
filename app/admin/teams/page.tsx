@@ -134,7 +134,12 @@ export default function AdminTeamsPage() {
     const loadTeams = async () => {
       const { data, error } = await supabase.from('teams').select('*')
       if (!error && data && data.length > 0) {
-        setTeams(data as Team[])
+        // Fall back to default week wins if the column/value is missing in the DB
+        const merged = (data as Team[]).map((t) => ({
+          ...t,
+          weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 3 : 0),
+        }))
+        setTeams(merged)
       }
       setLoading(false)
     }
@@ -144,7 +149,13 @@ export default function AdminTeamsPage() {
 
   const saveTeams = async () => {
     setSaving(true)
-    const { error } = await supabase.from('teams').upsert(teams)
+    // Try saving with weeksWins; if the column doesn't exist yet in the DB, retry without it
+    let { error } = await supabase.from('teams').upsert(teams)
+    if (error) {
+      const stripped = teams.map(({ weeksWins, ...rest }) => rest)
+      const retry = await supabase.from('teams').upsert(stripped)
+      error = retry.error
+    }
     setSaving(false)
     if (error) {
       console.error('Failed to save teams:', error)
