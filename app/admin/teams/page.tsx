@@ -26,6 +26,8 @@ type Member = {
   isTeamLead?: boolean
   onBreak?: boolean
   breakReturnDays?: number
+  breakReturnDate?: string
+  breakDuration?: string
 }
 
 type Team = {
@@ -56,7 +58,7 @@ const initialTeams: Team[] = [
     weeksWins: 0,
     members: [
       { id: 't2m1', name: 'Prakalya', points: 0 },
-      { id: 't2m2', name: 'Roshini', points: 0, onBreak: true, breakReturnDays: 22 },
+      { id: 't2m2', name: 'Roshini', points: 0, onBreak: true, breakDuration: '1 month', breakReturnDate: '2026-09-30T00:00:00' },
       { id: 't2m3', name: 'Dhavanithi', points: 0 },
       { id: 't2m4', name: 'Pushparajan', points: 0 },
       { id: 't2m5', name: 'gokulavarshini', points: 0 },
@@ -75,30 +77,36 @@ export default function AdminTeamsPage() {
   const [saving, setSaving] = useState(false)
   const [addMemberTeam, setAddMemberTeam] = useState<string | null>(null)
   const [newMemberName, setNewMemberName] = useState('')
-  const [countdown, setCountdown] = useState<{[key: string]: number}>({})
+  const [countdown, setCountdown] = useState<{[key: string]: string}>({})
 
-  // Countdown timer for members on break
+  // Live countdown timer for members on break
   useEffect(() => {
     const updateCountdowns = () => {
-      const newCountdowns: {[key: string]: number} = {}
+      const newCountdowns: {[key: string]: string} = {}
+      const now = new Date().getTime()
       teams.forEach(team => {
         team.members.forEach(member => {
-          if (member.onBreak && member.breakReturnDays) {
-            // Calculate days remaining (simplified - decreases by 1 each day)
-            const startDate = new Date()
-            const returnDate = new Date(startDate)
-            returnDate.setDate(returnDate.getDate() + member.breakReturnDays)
-            const daysLeft = Math.ceil((returnDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-            newCountdowns[member.id] = Math.max(0, daysLeft)
-          }
+          if (!member.onBreak) return
+          const returnTime = member.breakReturnDate
+            ? new Date(member.breakReturnDate).getTime()
+            : member.breakReturnDays
+              ? now + member.breakReturnDays * 24 * 60 * 60 * 1000
+              : null
+          if (returnTime === null) return
+          const diff = Math.max(0, returnTime - now)
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+          newCountdowns[member.id] = `${days}d ${hours}h ${minutes}m ${seconds}s`
         })
       })
       setCountdown(newCountdowns)
     }
 
     updateCountdowns()
-    // Update daily
-    const interval = setInterval(updateCountdowns, 86400000)
+    // Tick every second for a live countdown
+    const interval = setInterval(updateCountdowns, 1000)
     return () => clearInterval(interval)
   }, [teams])
 
@@ -357,9 +365,16 @@ export default function AdminTeamsPage() {
                                 </span>
                               )}
                               {member.onBreak && (
-                                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-yellow-500/10 text-yellow-400 px-2 py-0.5 text-xs font-bold">
-                                  On Break - {countdown[member.id] ?? member.breakReturnDays ?? 0}d left
-                                </span>
+                                <>
+                                  {member.breakDuration && (
+                                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-yellow-500/10 text-yellow-400 px-2 py-0.5 text-xs font-bold">
+                                      {member.breakDuration} Break
+                                    </span>
+                                  )}
+                                  <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-orange-500/10 text-orange-400 px-2 py-0.5 text-xs font-bold tabular-nums">
+                                    {countdown[member.id] ?? '—'} left to rejoin
+                                  </span>
+                                </>
                               )}
                             </p>
                             <p className="text-xs text-white/70">{member.points} pts</p>
