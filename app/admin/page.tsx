@@ -160,6 +160,10 @@ type TeamMember = {
   id: string
   name: string
   points: number
+  isTeamLead?: boolean
+  onBreak?: boolean
+  breakReturnDate?: string
+  breakDuration?: string
 }
 
 type Team = {
@@ -167,6 +171,38 @@ type Team = {
   name: string
   color: string
   members: TeamMember[]
+  weeksWins: number
+}
+
+// Fall back to default week wins if the value is missing in the DB
+const mergeTeamDefaults = (data: Team[]): Team[] =>
+  data.map((t) => ({
+    ...t,
+    weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 3 : 0),
+  }))
+
+// Live countdown for members on break
+function BreakCountdown({ member }: { member: TeamMember }) {
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const returnTime = member.breakReturnDate ? new Date(member.breakReturnDate).getTime() : null
+  if (returnTime === null) return null
+  const diff = Math.max(0, returnTime - now)
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+
+  return (
+    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-bold tabular-nums text-orange-400">
+      {`${days}d ${hours}h ${minutes}m ${seconds}s`} left to rejoin
+    </span>
+  )
 }
 
 // ============ STYLES ============
@@ -445,7 +481,7 @@ export default function AdminPage() {
     if (!testerEarningsRes.error && testerEarningsRes.data) setTesterEarnings(testerEarningsRes.data as TesterEarning[])
     if (!devProjectsRes.error && devProjectsRes.data) setDevProjects(devProjectsRes.data as DevProject[])
     if (!devEarningsRes.error && devEarningsRes.data) setDevEarnings(devEarningsRes.data as DevEarning[])
-    if (!teamsRes.error && teamsRes.data && teamsRes.data.length > 0) setTeams(teamsRes.data as Team[])
+    if (!teamsRes.error && teamsRes.data && teamsRes.data.length > 0) setTeams(mergeTeamDefaults(teamsRes.data as Team[]))
 
     setLoadingOrders(false)
   }
@@ -493,7 +529,7 @@ export default function AdminPage() {
         if (!testerEarningsRes.error && testerEarningsRes.data) setTesterEarnings(testerEarningsRes.data as TesterEarning[])
         if (!devProjectsRes.error && devProjectsRes.data) setDevProjects(devProjectsRes.data as DevProject[])
         if (!devEarningsRes.error && devEarningsRes.data) setDevEarnings(devEarningsRes.data as DevEarning[])
-        if (!teamsRes.error && teamsRes.data && teamsRes.data.length > 0) setTeams(teamsRes.data as Team[])
+        if (!teamsRes.error && teamsRes.data && teamsRes.data.length > 0) setTeams(mergeTeamDefaults(teamsRes.data as Team[]))
         setLoadingOrders(false)
       }
     })()
@@ -1018,7 +1054,13 @@ export default function AdminPage() {
 
   const saveTeams = async () => {
     setSavingTeams(true)
-    const { error } = await supabase.from('teams').upsert(teams)
+    // Try saving with weeksWins; if the column doesn't exist yet in the DB, retry without it
+    let { error } = await supabase.from('teams').upsert(teams)
+    if (error) {
+      const stripped = teams.map(({ weeksWins, ...rest }) => rest)
+      const retry = await supabase.from('teams').upsert(stripped)
+      error = retry.error
+    }
     setSavingTeams(false)
     if (error) {
       setError(`Failed to save teams: ${error.message}`)
@@ -3194,7 +3236,13 @@ export default function AdminPage() {
                           </div>
                           <div>
                             <h2 className={`text-2xl font-black uppercase tracking-wide ${accentText}`}>{team.name}</h2>
-                            <p className="text-sm text-white/70">{team.members.length} members</p>
+                            <div className="mt-1 flex items-center gap-2">
+                              <p className="text-sm text-white/70">{team.members.length} members</p>
+                              <span className={`inline-flex items-center gap-1 rounded-full ${accentBg} ${accentText} px-2 py-0.5 text-xs font-bold`}>
+                                <Trophy className="h-3 w-3" />
+                                {team.weeksWins} week{team.weeksWins !== 1 ? 's' : ''} win
+                              </span>
+                            </div>
                           </div>
                         </div>
                         <div className="text-right">
@@ -3230,8 +3278,21 @@ export default function AdminPage() {
                                   <p className={`font-semibold ${isTop ? 'text-amber-300' : 'text-white'}`}>
                                     {member.name}
                                     {isTop && <Crown className="ml-1.5 inline h-4 w-4" />}
+                                    {member.isTeamLead && (
+                                      <span className={`ml-2 inline-flex items-center gap-1 rounded-full ${accentBg} ${accentText} px-2 py-0.5 text-xs font-bold`}>
+                                        Team Lead
+                                      </span>
+                                    )}
+                                    {member.onBreak && member.breakDuration && (
+                                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-yellow-500/10 px-2 py-0.5 text-xs font-bold text-yellow-400">
+                                        {member.breakDuration} Break
+                                      </span>
+                                    )}
                                   </p>
-                                  <p className="text-xs text-white/70">{member.points} pts</p>
+                                  <p className="flex flex-wrap items-center gap-1 text-xs text-white/70">
+                                    <span>{member.points} pts</span>
+                                    {member.onBreak && <BreakCountdown member={member} />}
+                                  </p>
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
