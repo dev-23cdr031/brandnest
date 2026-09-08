@@ -5,6 +5,10 @@ export const DEVELOPER_EMAILS = [
   'gokulavarshinik.23csd@kongu.edu',
   'prakalyasb.23csd@kongu.edu',
   'ridhesavijayakumar.25cse@kongu.edu',
+  'priyankab.25cse@kongu.edu',
+  'devvsharanns.24aid@kongu.edu',
+  'ridheshavijayakumar.25cse@kongu.edu',
+  'nadhin.offx@gmail.com',
 ] as const
 
 export type DeveloperEmail = (typeof DEVELOPER_EMAILS)[number]
