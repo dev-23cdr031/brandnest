@@ -30,6 +30,7 @@ type Team = {
   name: string
   color: string
   members: Member[]
+  weeksWins: number
 }
 
 const initialTeams: Team[] = [
@@ -37,6 +38,7 @@ const initialTeams: Team[] = [
     id: 'team1',
     name: 'Team 1',
     color: 'red',
+    weeksWins: 3,
     members: [
       { id: 't1m1', name: 'Ranjith', points: 0 },
       { id: 't1m2', name: 'Manju Shri', points: 0 },
@@ -48,6 +50,7 @@ const initialTeams: Team[] = [
     id: 'team2',
     name: 'Team 2',
     color: 'blue',
+    weeksWins: 0,
     members: [
       { id: 't2m1', name: 'Prakalya', points: 0 },
       { id: 't2m2', name: 'Roshini', points: 0 },
@@ -277,7 +280,13 @@ export default function AdminTeamsPage() {
                     </div>
                     <div>
                       <h2 className={`text-2xl font-black uppercase tracking-wide ${accentText}`}>{team.name}</h2>
-                      <p className="text-sm text-white/70">{team.members.length} members</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-sm text-white/70">{team.members.length} members</p>
+                        <span className={`inline-flex items-center gap-1 rounded-full ${accentBg} ${accentText} px-2 py-0.5 text-xs font-bold`}>
+                          <Trophy className="h-3 w-3" />
+                          {team.weeksWins} week{team.weeksWins !== 1 ? 's' : ''} win
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div className="text-right">
