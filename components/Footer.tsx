@@ -24,7 +24,7 @@ const fundingPartners = [
 export function Footer() {
   const footerLinks = {
     Services: ['Web Design', 'Development', 'Branding', 'Strategy'],
-    Company: ['About Us', 'Team', 'Contact'],
+    Company: ['About Us', 'Team', 'Hackathon Winners', 'Contact'],
     Legal: ['Privacy Policy', 'Terms of Service', 'Cookie Policy'],
   }
 
@@ -65,9 +65,11 @@ export function Footer() {
                             ? '/about'
                             : category === 'Company' && link === 'Team'
                               ? '/team'
-                              : category === 'Company' && link === 'Contact'
-                                ? '/#contact'
-                                : '#'
+                              : category === 'Company' && link === 'Hackathon Winners'
+                                ? '/hackathon-winners'
+                                : category === 'Company' && link === 'Contact'
+                                  ? '/#contact'
+                                  : '#'
                       }
                       className="text-gray-400 hover:text-red-400 transition-colors text-sm"
                     >
