@@ -156,6 +156,42 @@ type DevEarning = {
   created_at: string
 }
 
+type JobApplication = {
+  id: string
+  created_at: string
+  full_name: string
+  email: string
+  phone: string
+  college_company: string
+  qualification: string
+  graduation_year: string
+  experience_level: string
+  years_experience: string
+  skills: string
+  position: string
+  job_type: string
+  work_location: string
+  resume_url: string
+  portfolio_url: string
+  github_url: string
+  linkedin_url: string
+  available_from: string | null
+  cover_letter: string
+  heard_from: string
+  status: string
+  notes: string
+}
+
+const applicationStatusStyles: Record<string, string> = {
+  New: 'bg-blue-500/15 text-blue-300 border-blue-400/30',
+  Screening: 'bg-amber-500/15 text-amber-300 border-amber-400/30',
+  'Task Round': 'bg-purple-500/15 text-purple-300 border-purple-400/30',
+  Interview: 'bg-cyan-500/15 text-cyan-300 border-cyan-400/30',
+  Offered: 'bg-emerald-500/15 text-emerald-300 border-emerald-400/30',
+  Hired: 'bg-green-500/15 text-green-300 border-green-400/30',
+  Rejected: 'bg-red-500/15 text-red-300 border-red-400/30',
+}
+
 type TeamMember = {
   id: string
   name: string
@@ -229,6 +265,148 @@ const orderStatusStyles: Record<Order['status'], string> = {
   Completed: 'bg-green-500/15 text-green-300 border-green-400/30',
 }
 
+// ============ TURNOVER (COMPANY REVENUE) ============
+type TurnoverMonth = {
+  key: string
+  label: string
+  orders: number
+}
+
+const buildTurnoverData = (orders: Order[]): TurnoverMonth[] => {
+  const now = new Date()
+  const months: TurnoverMonth[] = []
+  const byKey = new Map<string, TurnoverMonth>()
+
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = `${d.getFullYear()}-${d.getMonth()}`
+    months.push({
+      key,
+      label: d.toLocaleDateString('en-IN', { month: 'short' }) + (d.getMonth() === 0 ? ` '${String(d.getFullYear()).slice(2)}` : ''),
+      orders: 0,
+    })
+    byKey.set(key, months[months.length - 1])
+  }
+
+  const dateKey = (value: string | null) => {
+    const d = value ? new Date(value) : null
+    if (!d || isNaN(d.getTime())) return null
+    return `${d.getFullYear()}-${d.getMonth()}`
+  }
+
+  orders.forEach((o) => {
+    const m = byKey.get(dateKey(o.created_at) ?? '')
+    if (m) m.orders += parseAmount(o.price)
+  })
+
+  return months
+}
+
+// Stacked bar chart of monthly company turnover (pure SVG, no external chart library)
+function TurnoverChart({ data }: { data: TurnoverMonth[] }) {
+  const [hovered, setHovered] = useState<number | null>(null)
+
+  const segments = [
+    { key: 'orders' as const, label: 'Orders', color: '#f87171' },
+  ]
+
+  const totals = data.map((m) => m.orders)
+  const max = Math.max(...totals, 1)
+  const width = 720
+  const height = 280
+  const padding = { top: 24, right: 12, bottom: 34, left: 56 }
+  const chartW = width - padding.left - padding.right
+  const chartH = height - padding.top - padding.bottom
+  const slot = chartW / data.length
+  const barW = Math.min(44, slot * 0.6)
+  const magnitude = Math.pow(10, Math.floor(Math.log10(max)))
+  const yMax = Math.ceil(max / magnitude) * magnitude
+  const formatShort = (v: number) =>
+    v >= 100000 ? `₹${(v / 100000).toFixed(1)}L` : v >= 1000 ? `₹${(v / 1000).toFixed(1)}k` : `₹${v}`
+
+  return (
+    <div>
+      <div className="overflow-x-auto">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full min-w-[560px]" role="img" aria-label="Monthly company turnover chart">
+          <defs>
+            {segments.map((s) => (
+              <linearGradient key={s.key} id={`bar-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={s.color} stopOpacity="0.95" />
+                <stop offset="100%" stopColor={s.color} stopOpacity="0.55" />
+              </linearGradient>
+            ))}
+          </defs>
+
+          {[0, 0.25, 0.5, 0.75, 1].map((g) => {
+            const y = padding.top + chartH * g
+            return (
+              <g key={g}>
+                <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke="rgba(255,255,255,0.08)" strokeDasharray={g === 0 ? '0' : '4 6'} />
+                <text x={padding.left - 8} y={y + 4} textAnchor="end" fontSize="10" className="fill-white/40">
+                  {formatShort(Math.round(yMax * (1 - g)))}
+                </text>
+              </g>
+            )
+          })}
+
+          {data.map((m, i) => {
+            const x = padding.left + slot * i + (slot - barW) / 2
+            let accY = padding.top + chartH
+            const isHovered = hovered === i
+            return (
+              <g key={m.key} onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
+                <rect x={padding.left + slot * i} y={padding.top} width={slot} height={chartH} fill={isHovered ? 'rgba(255,255,255,0.05)' : 'transparent'} rx="6" />
+                {segments.map((s) => {
+                  const value = m[s.key]
+                  if (value <= 0) return null
+                  const h = Math.max(2, (value / yMax) * chartH)
+                  accY -= h
+                  return <rect key={s.key} x={x} y={accY} width={barW} height={h} fill={`url(#bar-${s.key})`} rx="3" />
+                })}
+                {totals[i] > 0 && (
+                  <text x={x + barW / 2} y={accY - 6} textAnchor="middle" fontSize="10" fontWeight="700" className={isHovered ? 'fill-white' : 'fill-white/60'}>
+                    {formatShort(totals[i])}
+                  </text>
+                )}
+                <text x={x + barW / 2} y={height - 12} textAnchor="middle" fontSize="10" className={isHovered ? 'fill-white' : 'fill-white/45'} fontWeight={isHovered ? 700 : 400}>
+                  {m.label}
+                </text>
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+        {segments.map((s) => (
+          <span key={s.key} className="inline-flex items-center gap-2 text-xs font-semibold text-white/70">
+            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+            {s.label}
+          </span>
+        ))}
+      </div>
+
+      <p className="mt-3 min-h-6 text-sm text-white/70">
+        {hovered !== null ? (
+          <>
+            <span className="font-bold text-white">{data[hovered].label}</span> turnover:{' '}
+            <span className="font-bold text-red-300">₹{totals[hovered].toLocaleString('en-IN')}</span>
+            {segments
+              .filter((s) => data[hovered][s.key] > 0)
+              .map((s) => (
+                <span key={s.key} className="ml-3 text-xs">
+                  {s.label}: <span className="font-semibold text-white/80">₹{data[hovered][s.key].toLocaleString('en-IN')}</span>
+                </span>
+              ))}
+          </>
+        ) : (
+          'Hover over a month to see the detailed breakdown.'
+        )}
+      </p>
+    </div>
+  )
+}
+
 const interviewStatusStyles: Record<Interview['status'], string> = {
   Scheduled: 'bg-blue-500/15 text-blue-300 border-blue-400/30',
   'In Progress': 'bg-amber-500/15 text-amber-300 border-amber-400/30',
@@ -296,7 +474,7 @@ export default function AdminPage() {
   const [checking, setChecking] = useState(true)
   const [authorized, setAuthorized] = useState(false)
   const [userName, setUserName] = useState('')
-  const [activeSection, setActiveSection] = useState<'overview' | 'orders' | 'hr' | 'crm' | 'tester' | 'developers' | 'teams'>('overview')
+  const [activeSection, setActiveSection] = useState<'overview' | 'orders' | 'hr' | 'crm' | 'tester' | 'developers' | 'applications' | 'teams'>('overview')
   const [refreshing, setRefreshing] = useState(false)
 
   // Orders
@@ -322,6 +500,9 @@ export default function AdminPage() {
 
   // Teams
   const [teams, setTeams] = useState<Team[]>([])
+
+  // Job applications (from the /careers Apply Now page)
+  const [applications, setApplications] = useState<JobApplication[]>([])
 
   // Forms
   const [saving, setSaving] = useState(false)
@@ -474,6 +655,7 @@ export default function AdminPage() {
       devProjectsRes,
       devEarningsRes,
       teamsRes,
+      applicationsRes,
     ] = await Promise.all([
       supabase.from('orders').select('*').order('created_at', { ascending: false }),
       supabase.from('hr_interviews').select('*').order('created_at', { ascending: false }),
@@ -486,6 +668,7 @@ export default function AdminPage() {
       supabase.from('developer_projects').select('*').order('created_at', { ascending: false }),
       supabase.from('developer_earnings').select('*').order('created_at', { ascending: false }),
       supabase.from('teams').select('*'),
+      supabase.from('job_applications').select('*').order('created_at', { ascending: false }),
     ])
 
     if (!ordersRes.error && ordersRes.data) setOrders(ordersRes.data as Order[])
@@ -499,6 +682,7 @@ export default function AdminPage() {
     if (!devProjectsRes.error && devProjectsRes.data) setDevProjects(devProjectsRes.data as DevProject[])
     if (!devEarningsRes.error && devEarningsRes.data) setDevEarnings(devEarningsRes.data as DevEarning[])
     if (!teamsRes.error && teamsRes.data && teamsRes.data.length > 0) setTeams(mergeTeamDefaults(teamsRes.data as Team[]))
+    if (!applicationsRes.error && applicationsRes.data) setApplications(applicationsRes.data as JobApplication[])
 
     setLoadingOrders(false)
   }
@@ -521,6 +705,7 @@ export default function AdminPage() {
         devProjectsRes,
         devEarningsRes,
         teamsRes,
+        applicationsRes,
       ] = await Promise.all([
         supabase.from('orders').select('*').order('created_at', { ascending: false }),
         supabase.from('hr_interviews').select('*').order('created_at', { ascending: false }),
@@ -533,6 +718,7 @@ export default function AdminPage() {
         supabase.from('developer_projects').select('*').order('created_at', { ascending: false }),
         supabase.from('developer_earnings').select('*').order('created_at', { ascending: false }),
         supabase.from('teams').select('*'),
+        supabase.from('job_applications').select('*').order('created_at', { ascending: false }),
       ])
 
       if (!cancelled) {
@@ -547,6 +733,7 @@ export default function AdminPage() {
         if (!devProjectsRes.error && devProjectsRes.data) setDevProjects(devProjectsRes.data as DevProject[])
         if (!devEarningsRes.error && devEarningsRes.data) setDevEarnings(devEarningsRes.data as DevEarning[])
         if (!teamsRes.error && teamsRes.data && teamsRes.data.length > 0) setTeams(mergeTeamDefaults(teamsRes.data as Team[]))
+        if (!applicationsRes.error && applicationsRes.data) setApplications(applicationsRes.data as JobApplication[])
         setLoadingOrders(false)
       }
     })()
@@ -571,13 +758,46 @@ export default function AdminPage() {
   }
 
   const handleDeleteOrder = async (order: Order) => {
-    const { error } = await supabase.from('orders').delete().eq('id', order.id)
-    if (!error) {
-      setOrders((prev) => prev.filter((o) => o.id !== order.id))
-      setMessage(`Order "${order.service}" deleted`)
-    } else {
+    if (!window.confirm(`Delete order "${order.service}" for ${order.name}? This cannot be undone.`)) return
+
+    // count: 'exact' tells us how many rows were actually deleted from the DB
+    const { error, count } = await supabase.from('orders').delete({ count: 'exact' }).eq('id', order.id)
+    if (error) {
       setError(`Failed to delete order: ${error.message}`)
+      return
     }
+    if (count === 0) {
+      setError('Delete blocked by database permissions (RLS). Run the order-delete SQL migration, then try again.')
+      return
+    }
+    setOrders((prev) => prev.filter((o) => o.id !== order.id))
+    setMessage(`Order "${order.service}" deleted`)
+  }
+
+  // ============ JOB APPLICATION HANDLERS ============
+  const handleUpdateApplicationStatus = async (applicationId: string, status: string) => {
+    const { error } = await supabase.from('job_applications').update({ status }).eq('id', applicationId)
+    if (!error) {
+      setApplications((prev) => prev.map((a) => (a.id === applicationId ? { ...a, status } : a)))
+      setMessage('Application status updated')
+    } else {
+      setError(`Failed to update application: ${error.message}`)
+    }
+  }
+
+  const handleDeleteApplication = async (application: JobApplication) => {
+    if (!window.confirm(`Delete application from ${application.full_name} for "${application.position}"? This cannot be undone.`)) return
+    const { error, count } = await supabase.from('job_applications').delete({ count: 'exact' }).eq('id', application.id)
+    if (error) {
+      setError(`Failed to delete application: ${error.message}`)
+      return
+    }
+    if (count === 0) {
+      setError('Delete blocked by database permissions (RLS). Run the job-applications SQL migration, then try again.')
+      return
+    }
+    setApplications((prev) => prev.filter((a) => a.id !== application.id))
+    setMessage(`Application from ${application.full_name} deleted`)
   }
 
   // ============ HR HANDLERS ============
@@ -1122,10 +1342,22 @@ export default function AdminPage() {
 
   const totalEarnedAll = totalHrEarned + totalCrmEarned + totalTesterEarned + totalDevPaid
 
-  const sortedTeams = teams.map((team) => ({
-    ...team,
-    members: [...team.members].sort((a, b) => b.points - a.points),
-  }))
+  // Monthly company turnover for the last 12 months (order values only)
+  const turnoverData = buildTurnoverData(orders)
+  const turnoverTotal = turnoverData.reduce((sum, m) => sum + m.orders, 0)
+  const turnoverThisMonth = turnoverData[turnoverData.length - 1].orders
+  const activeMonths = turnoverData.filter((m) => m.orders > 0).length
+  const turnoverAvg = activeMonths > 0 ? turnoverTotal / activeMonths : 0
+  const bestMonth = turnoverData.reduce((best, m) => (m.orders > best.orders ? m : best), turnoverData[0])
+  const bestMonthTotal = bestMonth.orders
+
+  const sortedTeams = teams
+    .map((team) => ({
+      ...team,
+      members: [...team.members].sort((a, b) => b.points - a.points),
+    }))
+    // Always render Team 1 first, Team 2 second (DB row order is not guaranteed)
+    .sort((a, b) => Number(b.id === 'team1' || b.name.toLowerCase().includes('1')) - Number(a.id === 'team1' || a.name.toLowerCase().includes('1')) || a.id.localeCompare(b.id))
 
   const team1 = sortedTeams[0]
   const team2 = sortedTeams[1]
@@ -1143,6 +1375,7 @@ export default function AdminPage() {
     { id: 'crm', label: 'CRM Management', icon: Handshake, color: 'text-emerald-400', active: 'bg-emerald-600' },
     { id: 'tester', label: 'Tester Management', icon: Bug, color: 'text-cyan-400', active: 'bg-cyan-600' },
     { id: 'developers', label: 'Developers', icon: Briefcase, color: 'text-purple-400', active: 'bg-purple-600' },
+    { id: 'applications', label: 'Applications', icon: ClipboardList, color: 'text-orange-400', active: 'bg-orange-600' },
     { id: 'teams', label: 'Team Points', icon: Trophy, color: 'text-amber-400', active: 'bg-amber-600' },
   ] as const
 
@@ -1370,6 +1603,44 @@ export default function AdminPage() {
                   </div>
                 </article>
               </div>
+
+              {/* Company turnover graph */}
+              <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-500/10 text-red-400">
+                      <Activity className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-black text-white">Company Turnover</h2>
+                      <p className="text-xs text-white/50">Revenue generated over the last 12 months</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4 text-right">
+                    <div>
+                      <p className="text-lg font-black text-white sm:text-xl">₹{turnoverTotal.toLocaleString('en-IN')}</p>
+                      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-white/50">12M Total</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-black text-red-300 sm:text-xl">₹{turnoverThisMonth.toLocaleString('en-IN')}</p>
+                      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-white/50">This Month</p>
+                    </div>
+                    <div className="hidden sm:block">
+                      <p className="text-lg font-black text-white sm:text-xl">₹{turnoverAvg.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+                      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-white/50">Monthly Avg</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <TurnoverChart data={turnoverData} />
+                </div>
+
+                <p className="mt-2 border-t border-white/10 pt-3 text-xs text-white/50">
+                  Best month: <span className="font-bold text-white/80">{bestMonth.label}</span> with{' '}
+                  <span className="font-bold text-red-300">₹{bestMonthTotal.toLocaleString('en-IN')}</span> turnover. Based on customer order values only.
+                </p>
+              </section>
 
               {/* Recent orders preview */}
               <section>
@@ -3180,6 +3451,121 @@ export default function AdminPage() {
             </div>
           )}
 
+          {/* ============ JOB APPLICATIONS ============ */}
+          {activeSection === 'applications' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <ClipboardList className="h-5 w-5 text-orange-400" />
+                  <h2 className="text-xl font-black text-white">Job Applications</h2>
+                </div>
+                <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-white/80">
+                  {applications.length} total
+                </span>
+              </div>
+
+              {loadingOrders ? (
+                <div className="flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] py-16 text-white/60">
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin text-orange-400" />
+                  Loading applications...
+                </div>
+              ) : applications.length === 0 ? (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] py-16 text-center">
+                  <ClipboardList className="mx-auto h-10 w-10 text-white/30" />
+                  <p className="mt-4 text-lg font-semibold text-white/70">No applications yet</p>
+                  <p className="mt-1 text-sm text-white/50">Applications submitted from the /careers page will appear here.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {applications.map((app) => (
+                    <article key={app.id} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 transition hover:border-white/20">
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-bold text-white">{app.full_name}</h3>
+                            <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${applicationStatusStyles[app.status] ?? applicationStatusStyles.New}`}>
+                              {app.status}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-sm font-semibold text-orange-300">{app.position || 'Position not specified'}</p>
+
+                          <div className="mt-3 grid gap-x-6 gap-y-1.5 text-sm text-white/70 sm:grid-cols-2">
+                            <span className="inline-flex items-center gap-1.5">
+                              <Mail className="h-3.5 w-3.5 text-orange-400" />
+                              {app.email}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5">
+                              <Phone className="h-3.5 w-3.5 text-orange-400" />
+                              {app.phone || '—'}
+                            </span>
+                            <span>College: {app.college_company || '—'}</span>
+                            <span>Qualification: {app.qualification || '—'} ({app.graduation_year || '—'})</span>
+                            <span>Experience: {app.experience_level}{app.years_experience && app.years_experience !== '0' ? ` · ${app.years_experience} yrs` : ''}</span>
+                            <span>Job type: {app.job_type} · {app.work_location}</span>
+                            <span className="sm:col-span-2">Skills: {app.skills || '—'}</span>
+                            <span>Heard from: {app.heard_from || '—'}</span>
+                            {app.available_from && <span>Available from: {formatDate(app.available_from)}</span>}
+                            <span>Applied: {formatDate(app.created_at)}</span>
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {app.resume_url && (
+                              <a href={app.resume_url} target="_blank" rel="noreferrer" className="rounded-full border border-orange-400/30 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-300 transition hover:bg-orange-500/20">
+                                Resume ↗
+                              </a>
+                            )}
+                            {app.portfolio_url && (
+                              <a href={app.portfolio_url} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-white/70 transition hover:bg-white/10">
+                                Portfolio ↗
+                              </a>
+                            )}
+                            {app.github_url && (
+                              <a href={app.github_url} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-white/70 transition hover:bg-white/10">
+                                GitHub ↗
+                              </a>
+                            )}
+                            {app.linkedin_url && (
+                              <a href={app.linkedin_url} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-white/70 transition hover:bg-white/10">
+                                LinkedIn ↗
+                              </a>
+                            )}
+                          </div>
+
+                          {app.cover_letter && (
+                            <p className="mt-3 whitespace-pre-wrap rounded-xl border border-white/10 bg-black/25 p-3 text-sm leading-6 text-white/75">
+                              {app.cover_letter}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex shrink-0 flex-row items-center gap-2 lg:w-44 lg:flex-col lg:items-stretch">
+                          <select
+                            value={app.status}
+                            onChange={(e) => handleUpdateApplicationStatus(app.id, e.target.value)}
+                            className="flex-1 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-400 lg:flex-none"
+                          >
+                            {['New', 'Screening', 'Task Round', 'Interview', 'Offered', 'Hired', 'Rejected'].map((s) => (
+                              <option key={s} value={s} className="bg-[#0c0c0c]">
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteApplication(app)}
+                            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-red-400/20 bg-red-500/10 px-3 text-xs font-semibold text-red-300 transition hover:bg-red-500/20"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ============ TEAM POINTS ============ */}
           {activeSection === 'teams' && (
             <div className="space-y-6">
@@ -3235,8 +3621,8 @@ export default function AdminPage() {
 
               {/* Teams Grid */}
               <div className="grid gap-6 lg:grid-cols-2">
-                {sortedTeams.map((team, teamIndex) => {
-                  const isTeam1 = teamIndex === 0
+                {sortedTeams.map((team) => {
+                  const isTeam1 = team.id === 'team1' || team.name.toLowerCase().includes('1')
                   const teamTotal = team.members.reduce((sum, m) => sum + m.points, 0)
                   const accentText = isTeam1 ? 'text-red-400' : 'text-blue-400'
                   const accentBg = isTeam1 ? 'bg-red-500/10' : 'bg-blue-500/10'
@@ -3280,7 +3666,7 @@ export default function AdminPage() {
                           const isTop = memberIndex === 0 && member.points > 0
                           return (
                             <div
-                              key={member.id}
+                              key={`${member.id || member.name}-${memberIndex}`}
                               className={`group flex items-center justify-between gap-3 rounded-xl border px-4 py-3 transition ${
                                 isTop
                                   ? 'border-amber-400/40 bg-amber-500/10 shadow-[0_0_25px_rgba(251,191,36,0.08)]'

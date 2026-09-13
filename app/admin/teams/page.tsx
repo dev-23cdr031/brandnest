@@ -59,11 +59,11 @@ const initialTeams: Team[] = [
     members: [
       { id: 't2m1', name: 'Prakalya', points: 0 },
       { id: 't2m2', name: 'Roshini', points: 0, onBreak: true, breakDuration: '1 month', breakReturnDate: '2026-09-30T00:00:00' },
-      { id: 't2m3', name: 'Dhavanithi', points: 0 },
-      { id: 't2m4', name: 'Pushparajan', points: 0 },
+      { id: 't2m3', name: 'Dhavanithi', points: 0, onBreak: true, breakDuration: '2 months', breakReturnDate: '2026-11-13T00:00:00' },
       { id: 't2m5', name: 'gokulavarshini', points: 0 },
       { id: 't2m6', name: 'Devv Sharann', points: 0 },
-      { id: 't2m7', name: 'Nadhin', points: 0, isTeamLead: true },
+      { id: 't2m7', name: 'Keerthi', points: 0 },
+      { id: 't2m8', name: 'Ranjani', points: 0, isTeamLead: true },
     ],
   },
 ]
@@ -235,11 +235,19 @@ export default function AdminTeamsPage() {
 
   if (!authorized) return null
 
-  // Sort members within each team by points descending so the top scorer is at the top
-  const sortedTeams = teams.map((team) => ({
-    ...team,
-    members: [...team.members].sort((a, b) => b.points - a.points),
-  }))
+  // Sort members within each team by points descending so the top scorer is at the top,
+  // and always render Team 1 first, Team 2 second (DB row order is not guaranteed)
+  const sortedTeams = teams
+    .map((team) => ({
+      ...team,
+      members: [...team.members].sort((a, b) => b.points - a.points),
+    }))
+    .sort(
+      (a, b) =>
+        Number(b.id === 'team1' || b.name.toLowerCase().includes('1')) -
+          Number(a.id === 'team1' || a.name.toLowerCase().includes('1')) ||
+        a.id.localeCompare(b.id),
+    )
 
   const team1 = sortedTeams[0]
   const team2 = sortedTeams[1]
@@ -324,8 +332,8 @@ export default function AdminTeamsPage() {
 
         {/* Teams Grid */}
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          {sortedTeams.map((team, teamIndex) => {
-            const isTeam1 = teamIndex === 0
+          {sortedTeams.map((team) => {
+            const isTeam1 = team.id === 'team1' || team.name.toLowerCase().includes('1')
             const teamTotal = team.members.reduce((sum, m) => sum + m.points, 0)
             const accentText = isTeam1 ? 'text-red-400' : 'text-blue-400'
             const accentBg = isTeam1 ? 'bg-red-500/10' : 'bg-blue-500/10'
@@ -371,7 +379,7 @@ export default function AdminTeamsPage() {
                     const isTop = memberIndex === 0 && member.points > 0
                     return (
                       <div
-                        key={member.id}
+                        key={`${member.id || member.name}-${memberIndex}`}
                         className={`group flex items-center justify-between gap-3 rounded-xl border px-4 py-3 transition ${
                           isTop
                             ? 'border-amber-400/40 bg-amber-500/10 shadow-[0_0_25px_rgba(251,191,36,0.08)]'

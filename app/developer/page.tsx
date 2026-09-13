@@ -55,7 +55,7 @@ type Team = {
   id: string
   name: string
   color: string
-  members: { id: string; name: string; points: number }[]
+  members: { id: string; name: string; points: number; isTeamLead?: boolean }[]
 }
 
 function formatDate(iso: string | null) {
@@ -202,10 +202,19 @@ export default function DeveloperDashboard() {
     { label: 'Total Earnings', value: `₹${totalEarnings.toLocaleString('en-IN')}`, icon: Banknote, accent: 'text-red-400 bg-red-500/10' },
   ]
 
-  const sortedTeams = teams.map((team) => ({
-    ...team,
-    members: [...team.members].sort((a, b) => b.points - a.points),
-  }))
+  // Sort members within each team by points descending so the top scorer is at the top,
+  // and always render Team 1 first, Team 2 second (DB row order is not guaranteed)
+  const sortedTeams = teams
+    .map((team) => ({
+      ...team,
+      members: [...team.members].sort((a, b) => b.points - a.points),
+    }))
+    .sort(
+      (a, b) =>
+        Number(b.id === 'team1' || b.name.toLowerCase().includes('1')) -
+          Number(a.id === 'team1' || a.name.toLowerCase().includes('1')) ||
+        a.id.localeCompare(b.id),
+    )
 
   const tabs = [
     { id: 'projects', label: 'Projects', icon: Briefcase },
@@ -378,8 +387,8 @@ export default function DeveloperDashboard() {
               <EmptyState icon={Trophy} title="No team data yet" description="Team points will appear here." />
             ) : (
               <div className="mt-6 grid gap-6 lg:grid-cols-2">
-                {sortedTeams.map((team, teamIndex) => {
-                  const isTeam1 = teamIndex === 0
+                {sortedTeams.map((team) => {
+                  const isTeam1 = team.id === 'team1' || team.name.toLowerCase().includes('1')
                   const teamTotal = team.members.reduce((sum, m) => sum + m.points, 0)
                   const accentText = isTeam1 ? 'text-red-400' : 'text-blue-400'
                   const accentBg = isTeam1 ? 'bg-red-500/10' : 'bg-blue-500/10'
@@ -408,7 +417,7 @@ export default function DeveloperDashboard() {
                           const isTop = memberIndex === 0 && member.points > 0
                           return (
                             <div
-                              key={member.id}
+                              key={`${member.id || member.name}-${memberIndex}`}
                               className={`flex items-center justify-between gap-3 rounded-xl border px-4 py-3 ${
                                 isTop
                                   ? 'border-amber-400/40 bg-amber-500/10 shadow-[0_0_25px_rgba(251,191,36,0.08)]'
@@ -423,15 +432,25 @@ export default function DeveloperDashboard() {
                                   <p className={`font-semibold ${isTop ? 'text-amber-300' : 'text-white'}`}>
                                     {member.name}
                                     {isTop && <Crown className="ml-1.5 inline h-4 w-4" />}
+                                    {member.isTeamLead && (
+                                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[0.65rem] font-bold text-amber-300">
+                                        <Crown className="inline h-3 w-3" />
+                                        Team Lead
+                                      </span>
+                                    )}
                                   </p>
                                   <p className="text-xs text-white/70">{member.points} pts</p>
                                 </div>
                               </div>
-                              {isTop && (
+                              {member.isTeamLead ? (
+                                <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-300">
+                                  Team Lead
+                                </span>
+                              ) : isTop ? (
                                 <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-300">
                                   Leader
                                 </span>
-                              )}
+                              ) : null}
                             </div>
                           )
                         })}

@@ -9,6 +9,7 @@ import {
   CalendarDays,
   CheckCircle2,
   ClipboardList,
+  Crown,
   LayoutDashboard,
   Loader2,
   Plus,
@@ -75,6 +76,7 @@ type TeamMember = {
   id: string
   name: string
   points: number
+  isTeamLead?: boolean
 }
 
 type Team = {
@@ -83,6 +85,34 @@ type Team = {
   color: string
   members: TeamMember[]
 }
+
+type JobApplication = {
+  id: string
+  created_at: string
+  full_name: string
+  email: string
+  phone: string
+  college_company: string
+  qualification: string
+  graduation_year: string
+  experience_level: string
+  years_experience: string
+  skills: string
+  position: string
+  job_type: string
+  work_location: string
+  resume_url: string
+  portfolio_url: string
+  github_url: string
+  linkedin_url: string
+  available_from: string | null
+  cover_letter: string
+  heard_from: string
+  status: string
+  notes: string
+}
+
+const applicationStatusOptions = ['New', 'Screening', 'Task Round', 'Interview', 'Offered', 'Hired', 'Rejected']
 
 function formatDate(iso: string | null) {
   if (!iso) return '—'
@@ -108,13 +138,14 @@ export default function HRPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [userName, setUserName] = useState('')
   const [userEmail, setUserEmail] = useState('')
-  const [activeTab, setActiveTab] = useState<'interviews' | 'completed' | 'candidates' | 'earnings' | 'teams'>('candidates')
+  const [activeTab, setActiveTab] = useState<'interviews' | 'completed' | 'candidates' | 'applications' | 'earnings' | 'teams'>('candidates')
 
   // Data
   const [interviews, setInterviews] = useState<Interview[]>([])
   const [candidates, setCandidates] = useState<Candidate[]>([])
   const [earnings, setEarnings] = useState<Earning[]>([])
   const [teams, setTeams] = useState<Team[]>([])
+  const [applications, setApplications] = useState<JobApplication[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [savingTeams, setSavingTeams] = useState(false)
@@ -189,7 +220,7 @@ export default function HRPage() {
     console.log('LOGGED IN HR EMAIL:', userEmailNormalized)
     console.log('IS MANAGER (non-admin):', isManager)
 
-    const [interviewsRes, candidatesRes, earningsRes, teamsRes] = await Promise.all([
+    const [interviewsRes, candidatesRes, earningsRes, teamsRes, applicationsRes] = await Promise.all([
       isManager
         ? supabase.from('hr_interviews').select('*').eq('assigned_to_email', userEmailNormalized).order('created_at', { ascending: false })
         : supabase.from('hr_interviews').select('*').order('created_at', { ascending: false }),
@@ -200,6 +231,7 @@ export default function HRPage() {
         ? supabase.from('hr_earnings').select('*').eq('assigned_to_email', userEmailNormalized).order('created_at', { ascending: false })
         : supabase.from('hr_earnings').select('*').order('created_at', { ascending: false }),
       supabase.from('teams').select('*'),
+      supabase.from('job_applications').select('*').order('created_at', { ascending: false }),
     ])
 
     console.log('FOUND INTERVIEWS:', interviewsRes.data)
@@ -211,6 +243,7 @@ export default function HRPage() {
     if (!candidatesRes.error && candidatesRes.data) setCandidates(candidatesRes.data as Candidate[])
     if (!earningsRes.error && earningsRes.data) setEarnings(earningsRes.data as Earning[])
     if (!teamsRes.error && teamsRes.data && teamsRes.data.length > 0) setTeams(teamsRes.data as Team[])
+    if (!applicationsRes.error && applicationsRes.data) setApplications(applicationsRes.data as JobApplication[])
     setLoading(false)
   }
 
@@ -226,7 +259,7 @@ export default function HRPage() {
       console.log('PAGE LOAD - LOGGED IN HR EMAIL:', userEmailNormalized)
       console.log('PAGE LOAD - IS MANAGER (non-admin):', isManager)
 
-      const [interviewsRes, candidatesRes, earningsRes, teamsRes] = await Promise.all([
+      const [interviewsRes, candidatesRes, earningsRes, teamsRes, applicationsRes] = await Promise.all([
         isManager
           ? supabase.from('hr_interviews').select('*').eq('assigned_to_email', userEmailNormalized).order('created_at', { ascending: false })
           : supabase.from('hr_interviews').select('*').order('created_at', { ascending: false }),
@@ -237,6 +270,7 @@ export default function HRPage() {
           ? supabase.from('hr_earnings').select('*').eq('assigned_to_email', userEmailNormalized).order('created_at', { ascending: false })
           : supabase.from('hr_earnings').select('*').order('created_at', { ascending: false }),
         supabase.from('teams').select('*'),
+        supabase.from('job_applications').select('*').order('created_at', { ascending: false }),
       ])
 
       console.log('PAGE LOAD - FOUND CANDIDATES:', candidatesRes.data)
@@ -247,6 +281,7 @@ export default function HRPage() {
         if (!candidatesRes.error && candidatesRes.data) setCandidates(candidatesRes.data as Candidate[])
         if (!earningsRes.error && earningsRes.data) setEarnings(earningsRes.data as Earning[])
         if (!teamsRes.error && teamsRes.data && teamsRes.data.length > 0) setTeams(teamsRes.data as Team[])
+        if (!applicationsRes.error && applicationsRes.data) setApplications(applicationsRes.data as JobApplication[])
         setLoading(false)
       }
     })()
@@ -376,6 +411,32 @@ export default function HRPage() {
     }
   }
 
+  // ============ JOB APPLICATION HANDLERS ============
+  const handleUpdateApplicationStatus = async (applicationId: string, status: string) => {
+    const { error } = await supabase.from('job_applications').update({ status }).eq('id', applicationId)
+    if (!error) {
+      setApplications((prev) => prev.map((a) => (a.id === applicationId ? { ...a, status } : a)))
+      setMessage('Application status updated')
+    } else {
+      setError(`Failed to update application: ${error.message}`)
+    }
+  }
+
+  const handleDeleteApplication = async (application: JobApplication) => {
+    if (!window.confirm(`Delete application from ${application.full_name} for "${application.position}"? This cannot be undone.`)) return
+    const { error, count } = await supabase.from('job_applications').delete({ count: 'exact' }).eq('id', application.id)
+    if (error) {
+      setError(`Failed to delete application: ${error.message}`)
+      return
+    }
+    if (count === 0) {
+      setError('Delete blocked by database permissions (RLS). Run the job-applications SQL migration, then try again.')
+      return
+    }
+    setApplications((prev) => prev.filter((a) => a.id !== application.id))
+    setMessage(`Application from ${application.full_name} deleted`)
+  }
+
   const handleDeleteEarning = async (earning: Earning) => {
     const { error } = await supabase.from('hr_earnings').delete().eq('id', earning.id)
     if (!error) {
@@ -448,11 +509,13 @@ export default function HRPage() {
         { id: 'interviews', label: 'Interviews', icon: ClipboardList },
         { id: 'completed', label: 'Completed', icon: CheckCircle2 },
         { id: 'candidates', label: 'Candidate Assigned', icon: UsersRound },
+        { id: 'applications', label: 'Applications', icon: ClipboardList },
         { id: 'earnings', label: 'Amount Earned', icon: Banknote },
         { id: 'teams', label: 'Team Points', icon: Trophy },
       ] as const)
     : ([
         { id: 'candidates', label: 'Candidate Assigned', icon: UsersRound },
+        { id: 'applications', label: 'Applications', icon: ClipboardList },
         { id: 'earnings', label: 'Amount Earned', icon: Banknote },
         { id: 'teams', label: 'Team Points', icon: Trophy },
       ] as const)
@@ -504,7 +567,7 @@ export default function HRPage() {
           tabs={tabs}
           activeTab={activeTab}
           onChange={(id) => setActiveTab(id as typeof activeTab)}
-          className={`grid-cols-2 ${isAdmin ? 'sm:grid-cols-5' : 'sm:grid-cols-3'}`}
+          className={`grid-cols-2 ${isAdmin ? 'sm:grid-cols-6' : 'sm:grid-cols-4'}`}
         />
 
         {/* ============ INTERVIEWS TAB ============ */}
@@ -1173,6 +1236,108 @@ export default function HRPage() {
           </section>
         )}
 
+        {/* ============ JOB APPLICATIONS TAB ============ */}
+        {activeTab === 'applications' && (
+          <section className="mt-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <ClipboardList className="h-5 w-5 text-orange-400" />
+                <h2 className="text-xl font-black text-white">Job Applications</h2>
+              </div>
+              <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-white/80">
+                {applications.length} total
+              </span>
+            </div>
+
+            {loading ? (
+              <LoadingState label="Loading applications..." />
+            ) : applications.length === 0 ? (
+              <EmptyState icon={ClipboardList} title="No applications yet" description="Applications submitted from the /careers page will appear here." />
+            ) : (
+              <div className="mt-6 space-y-4">
+                {applications.map((app) => (
+                  <article key={app.id} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 transition hover:border-white/20">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-bold text-white">{app.full_name}</h3>
+                          <span className="rounded-full border border-orange-400/30 bg-orange-500/10 px-2.5 py-0.5 text-xs font-semibold text-orange-300">
+                            {app.status}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm font-semibold text-orange-300">{app.position || 'Position not specified'}</p>
+
+                        <div className="mt-3 grid gap-x-6 gap-y-1.5 text-sm text-white/70 sm:grid-cols-2">
+                          <span>Email: {app.email}</span>
+                          <span>Phone: {app.phone || '—'}</span>
+                          <span>College/Company: {app.college_company || '—'}</span>
+                          <span>Qualification: {app.qualification || '—'} ({app.graduation_year || '—'})</span>
+                          <span>Experience: {app.experience_level}{app.years_experience && app.years_experience !== '0' ? ` · ${app.years_experience} yrs` : ''}</span>
+                          <span>Job type: {app.job_type} · {app.work_location}</span>
+                          <span className="sm:col-span-2">Skills: {app.skills || '—'}</span>
+                          <span>Heard from: {app.heard_from || '—'}</span>
+                          {app.available_from && <span>Available from: {formatDate(app.available_from)}</span>}
+                          <span>Applied: {formatDate(app.created_at)}</span>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {app.resume_url && (
+                            <a href={app.resume_url} target="_blank" rel="noreferrer" className="rounded-full border border-orange-400/30 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-300 transition hover:bg-orange-500/20">
+                              Resume ↗
+                            </a>
+                          )}
+                          {app.portfolio_url && (
+                            <a href={app.portfolio_url} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-white/70 transition hover:bg-white/10">
+                              Portfolio ↗
+                            </a>
+                          )}
+                          {app.github_url && (
+                            <a href={app.github_url} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-white/70 transition hover:bg-white/10">
+                              GitHub ↗
+                            </a>
+                          )}
+                          {app.linkedin_url && (
+                            <a href={app.linkedin_url} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-white/70 transition hover:bg-white/10">
+                              LinkedIn ↗
+                            </a>
+                          )}
+                        </div>
+
+                        {app.cover_letter && (
+                          <p className="mt-3 whitespace-pre-wrap rounded-xl border border-white/10 bg-black/25 p-3 text-sm leading-6 text-white/75">
+                            {app.cover_letter}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex shrink-0 flex-row items-center gap-2 lg:w-44 lg:flex-col lg:items-stretch">
+                        <select
+                          value={app.status}
+                          onChange={(e) => handleUpdateApplicationStatus(app.id, e.target.value)}
+                          className="flex-1 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-400 lg:flex-none"
+                        >
+                          {applicationStatusOptions.map((s) => (
+                            <option key={s} value={s} className="bg-[#0c0c0c]">
+                              {s}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteApplication(app)}
+                          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-red-400/20 bg-red-500/10 px-3 text-xs font-semibold text-red-300 transition hover:bg-red-500/20"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
         {/* ============ TEAM POINTS TAB ============ */}
         {activeTab === 'teams' && (
           <section className="mt-6">
@@ -1200,8 +1365,15 @@ export default function HRPage() {
               <EmptyState icon={Trophy} title="No teams found" description="Teams will appear here once created by the admin." />
             ) : (
               <div className="mt-6 grid gap-6 lg:grid-cols-2">
-                {teams.map((team, teamIndex) => {
-                  const isTeam1 = teamIndex === 0
+                {[...teams]
+                  .sort(
+                    (a, b) =>
+                      Number(b.id === 'team1' || b.name.toLowerCase().includes('1')) -
+                        Number(a.id === 'team1' || a.name.toLowerCase().includes('1')) ||
+                      a.id.localeCompare(b.id),
+                  )
+                  .map((team) => {
+                  const isTeam1 = team.id === 'team1' || team.name.toLowerCase().includes('1')
                   const teamTotal = team.members.reduce((sum, m) => sum + m.points, 0)
                   const accentText = isTeam1 ? 'text-red-400' : 'text-blue-400'
                   const accentBg = isTeam1 ? 'bg-red-500/10' : 'bg-blue-500/10'
@@ -1240,7 +1412,7 @@ export default function HRPage() {
                           const isTop = memberIndex === 0 && member.points > 0
                           return (
                             <div
-                              key={member.id}
+                              key={`${member.id || member.name}-${memberIndex}`}
                               className={`group flex items-center justify-between gap-3 rounded-xl border px-4 py-3 transition ${
                                 isTop
                                   ? 'border-amber-400/40 bg-amber-500/10 shadow-[0_0_25px_rgba(251,191,36,0.08)]'
@@ -1255,6 +1427,12 @@ export default function HRPage() {
                                   <p className={`font-semibold ${isTop ? 'text-amber-300' : 'text-white'}`}>
                                     {member.name}
                                     {isTop && <Trophy className="ml-1.5 inline h-4 w-4" />}
+                                    {member.isTeamLead && (
+                                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[0.65rem] font-bold text-amber-300">
+                                        <Crown className="inline h-3 w-3" />
+                                        Team Lead
+                                      </span>
+                                    )}
                                   </p>
                                   <p className="text-xs text-white/70">{member.points} pts</p>
                                 </div>

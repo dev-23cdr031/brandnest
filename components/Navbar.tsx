@@ -63,6 +63,12 @@ export function Navbar() {
               </Link>
             ))}
             <Link
+              href="/careers"
+              className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-black shadow-lg transition hover:bg-amber-400 hover:shadow-premium"
+            >
+              Apply Now
+            </Link>
+            <Link
               href="/signup"
               className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-red-700 hover:shadow-premium"
             >
@@ -104,7 +110,14 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <div className="px-3 py-2">
+              <div className="px-3 py-2 space-y-2">
+                <Link
+                  href="/careers"
+                  className="block w-full rounded-lg bg-amber-500 px-4 py-2 text-center text-sm font-bold text-black hover:bg-amber-400"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Apply Now
+                </Link>
                 <Link
                   href="/signup"
                   className="block w-full rounded-lg bg-red-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-red-700"

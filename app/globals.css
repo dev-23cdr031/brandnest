@@ -181,6 +181,12 @@
   transform-origin: center center;
 }
 
+@media (max-width: 767px) {
+  .about-hero-kenburns {
+    animation: none;
+  }
+}
+
 .animate-slideInUp {
   animation: slideInUp 0.6s ease-out;
 }

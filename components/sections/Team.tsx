@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion, useInView, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion'
+import { motion, useInView, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import type { MotionValue } from 'framer-motion'
 import {
   ArrowRight,
@@ -427,9 +427,6 @@ export function TeamSection() {
     [glowX, glowY],
     ([x, y]) => `radial-gradient(circle at ${x} ${y}, rgba(248,113,113,0.28), transparent 26%)`,
   )
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 135])
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1.04, 1.16])
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect()
@@ -450,9 +447,6 @@ export function TeamSection() {
         onPointerMove={handlePointerMove}
         className="relative flex min-h-screen items-center px-4 py-28 sm:px-6 lg:px-8"
       >
-        <motion.div className="absolute inset-0" style={{ y: heroY, scale: heroScale }}>
-          <Image src="/team/photos/premium-team.jpg" alt="Premium team group background" fill priority className="object-cover opacity-58" />
-        </motion.div>
         <div className="absolute inset-0 animate-[premiumPulse_10s_ease-in-out_infinite] bg-[radial-gradient(circle_at_18%_16%,rgba(239,68,68,0.4),transparent_26%),radial-gradient(circle_at_82%_22%,rgba(185,28,28,0.36),transparent_30%),linear-gradient(135deg,rgba(5,5,5,0.7)_0%,rgba(25,3,3,0.54)_34%,rgba(96,9,9,0.38)_63%,rgba(5,5,5,0.82)_100%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.86),rgba(0,0,0,0.48),rgba(0,0,0,0.78)),linear-gradient(180deg,rgba(0,0,0,0.2),rgba(0,0,0,0.9))]" />
         <motion.div

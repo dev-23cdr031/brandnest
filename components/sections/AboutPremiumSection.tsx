@@ -173,7 +173,7 @@ export function AboutPremiumSection() {
             fill
             priority
             sizes="100vw"
-            className="about-hero-kenburns object-cover object-center"
+            className="about-hero-kenburns object-contain object-center md:object-cover"
           />
         </motion.div>
 
@@ -248,7 +248,7 @@ export function AboutPremiumSection() {
           <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.7 }} className="relative">
             <div className="absolute -left-6 top-10 h-28 w-28 rounded-full bg-red-500/20 blur-3xl" />
             <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-3 shadow-[0_25px_90px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-              <Image src="/team/photos/our-story.jpg" alt="Our story" width={1200} height={1400} className="h-[34rem] w-full rounded-[1.5rem] object-cover" />
+              <Image src="/team/photos/our-story.jpg" alt="Our story" width={1200} height={1400} className="h-72 w-full rounded-[1.5rem] object-cover sm:h-[30rem] lg:h-[34rem]" />
             </div>
           </motion.div>
 
@@ -402,7 +402,7 @@ export function AboutPremiumSection() {
             <div className="absolute -left-10 top-10 h-28 w-28 rounded-full bg-red-500/20 blur-3xl" />
             <div className="absolute -right-8 bottom-8 h-24 w-24 rounded-full bg-white/10 blur-3xl" />
             <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-3 shadow-[0_28px_90px_rgba(0,0,0,0.3)] backdrop-blur-xl">
-              <Image src="/team/photos/team-spirit.jpg" alt="Team spirit" width={1200} height={1000} className="h-[28rem] w-full rounded-[1.5rem] object-cover" />
+              <Image src="/team/photos/team-spirit.jpg" alt="Team spirit" width={1200} height={1000} className="h-64 w-full rounded-[1.5rem] object-cover sm:h-[24rem] lg:h-[28rem]" />
             </div>
             <motion.div className="absolute left-6 top-6 h-14 w-14 rounded-2xl border border-white/10 bg-white/10 backdrop-blur-xl" animate={{ rotate: [0, 12, 0], y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }} />
             <motion.div className="absolute right-6 top-20 h-10 w-10 rounded-full bg-red-500/20" animate={{ scale: [1, 1.2, 1], y: [0, 8, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }} />
