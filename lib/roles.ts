@@ -20,6 +20,7 @@ export const HR_EMAILS = [
   'rhear.25cse@kongu.edu',
   'brandnestcompany@gmail.com',
   'dhavanithim.23csd@kongu.edu',
+  'ranjanip.25cse@kongu.edu',
 ] as const
 
 // Client Relationship Manager (CRM) emails
