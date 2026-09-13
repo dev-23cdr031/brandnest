@@ -45,7 +45,7 @@ const serviceOptions = [
 ]
 
 const contactCards = [
-  { icon: MapPin, label: 'Location', value: 'Erode, Tamil Nadu', href: 'https://maps.google.com' },
+  { icon: MapPin, label: 'Location', value: 'Virudhunagar, Tamil Nadu', href: 'https://maps.google.com/?q=Virudhunagar,+Tamil+Nadu' },
   { icon: Globe2, label: 'Available Worldwide', value: 'Remote delivery across time zones', href: '/contact' },
   { icon: Phone, label: 'Phone', value: '9363534589', href: 'tel:9363534589' },
   { icon: Mail, label: 'Email', value: 'devdharrshan421@gmail.com', href: 'mailto:devdharrshan421@gmail.com' },
