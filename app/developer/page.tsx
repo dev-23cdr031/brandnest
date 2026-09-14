@@ -13,6 +13,7 @@ import {
   Crown,
   LayoutDashboard,
   Loader2,
+  MessageCircle,
   RefreshCw,
   Trophy,
   UsersRound,
@@ -20,6 +21,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { isDeveloperEmail } from '@/lib/developers'
+import MessageCenter from '@/components/messages/MessageCenter'
 import {
   DashboardShell,
   DashboardHeader,
@@ -79,7 +81,7 @@ export default function DeveloperDashboard() {
   const [checking, setChecking] = useState(true)
   const [authorized, setAuthorized] = useState(false)
   const [userName, setUserName] = useState('')
-  const [activeView, setActiveView] = useState<'projects' | 'earnings' | 'teams'>('projects')
+  const [activeView, setActiveView] = useState<'projects' | 'earnings' | 'teams' | 'messages'>('projects')
   const [projects, setProjects] = useState<Project[]>([])
   const [earnings, setEarnings] = useState<Earning[]>([])
   const [teams, setTeams] = useState<Team[]>([])
@@ -222,6 +224,7 @@ export default function DeveloperDashboard() {
     { id: 'projects', label: 'Projects', icon: Briefcase },
     { id: 'earnings', label: 'Earnings', icon: Wallet },
     { id: 'teams', label: 'Team Points', icon: Trophy },
+    { id: 'messages', label: 'Messages', icon: MessageCircle },
   ] as const
 
   return (
@@ -256,7 +259,7 @@ export default function DeveloperDashboard() {
         </div>
 
         {/* View tabs */}
-        <Tabs tabs={tabs} activeTab={activeView} onChange={(id) => setActiveView(id as typeof activeView)} className="grid-cols-3 sm:max-w-md" />
+        <Tabs tabs={tabs} activeTab={activeView} onChange={(id) => setActiveView(id as typeof activeView)} className="grid-cols-2 sm:grid-cols-4 sm:max-w-xl" />
 
         {/* Projects view */}
         {activeView === 'projects' && (
@@ -460,6 +463,13 @@ export default function DeveloperDashboard() {
                 })}
               </div>
             )}
+          </section>
+        )}
+
+        {/* Messages view */}
+        {activeView === 'messages' && (
+          <section className="mt-6">
+            <MessageCenter />
           </section>
         )}
       </div>

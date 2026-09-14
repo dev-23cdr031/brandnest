@@ -14,6 +14,7 @@ import {
   Crown,
   LayoutDashboard,
   Loader2,
+  MessageCircle,
   Plus,
   Trash2,
   Trophy,
@@ -31,6 +32,7 @@ import {
   EmptyState,
   LoadingState,
 } from '@/components/dashboard'
+import MessageCenter from '@/components/messages/MessageCenter'
 
 type Project = {
   id: string
@@ -94,7 +96,7 @@ export default function TesterPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [userName, setUserName] = useState('')
   const [userEmail, setUserEmail] = useState('')
-  const [activeTab, setActiveTab] = useState<'projects' | 'earnings' | 'teams'>('projects')
+  const [activeTab, setActiveTab] = useState<'projects' | 'earnings' | 'teams' | 'messages'>('projects')
 
   // Data
   const [projects, setProjects] = useState<Project[]>([])
@@ -332,6 +334,7 @@ export default function TesterPage() {
     { id: 'projects', label: 'Project Assigned', icon: Bug },
     { id: 'earnings', label: 'Amount Earned', icon: Banknote },
     { id: 'teams', label: 'Team Points', icon: Trophy },
+    { id: 'messages', label: 'Messages', icon: MessageCircle },
   ] as const
 
   return (
@@ -377,7 +380,7 @@ export default function TesterPage() {
         )}
 
         {/* Tabs */}
-        <Tabs tabs={tabs} activeTab={activeTab} onChange={(id) => setActiveTab(id as typeof activeTab)} className="grid-cols-3 sm:max-w-lg" />
+        <Tabs tabs={tabs} activeTab={activeTab} onChange={(id) => setActiveTab(id as typeof activeTab)} className="grid-cols-2 sm:grid-cols-4 sm:max-w-xl" />
 
         {/* ============ PROJECTS TAB ============ */}
         {activeTab === 'projects' && (
@@ -858,6 +861,13 @@ export default function TesterPage() {
                 })}
               </div>
             )}
+          </section>
+        )}
+
+        {/* Messages */}
+        {activeTab === 'messages' && (
+          <section className="mt-6">
+            <MessageCenter />
           </section>
         )}
       </div>

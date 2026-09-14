@@ -15,6 +15,7 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import MessageCenter from '@/components/messages/MessageCenter'
 
 type Order = {
   id: string
@@ -228,6 +229,11 @@ export default function MyOrdersPage() {
               ))}
             </div>
           )}
+        </section>
+
+        {/* Messages */}
+        <section className="mt-8">
+          <MessageCenter />
         </section>
       </div>
     </main>

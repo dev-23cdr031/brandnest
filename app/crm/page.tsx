@@ -14,6 +14,7 @@ import {
   Handshake,
   LayoutDashboard,
   Loader2,
+  MessageCircle,
   Plus,
   Trash2,
   Trophy,
@@ -31,6 +32,7 @@ import {
   EmptyState,
   LoadingState,
 } from '@/components/dashboard'
+import MessageCenter from '@/components/messages/MessageCenter'
 
 type Client = {
   id: string
@@ -96,7 +98,7 @@ export default function CRMPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [userName, setUserName] = useState('')
   const [userEmail, setUserEmail] = useState('')
-  const [activeTab, setActiveTab] = useState<'clients' | 'earnings' | 'teams'>('clients')
+  const [activeTab, setActiveTab] = useState<'clients' | 'earnings' | 'teams' | 'messages'>('clients')
 
   // Data
   const [clients, setClients] = useState<Client[]>([])
@@ -338,6 +340,7 @@ export default function CRMPage() {
     { id: 'clients', label: 'Client Assigned', icon: UsersRound },
     { id: 'earnings', label: 'Amount Earned', icon: Banknote },
     { id: 'teams', label: 'Team Points', icon: Trophy },
+    { id: 'messages', label: 'Messages', icon: MessageCircle },
   ] as const
 
   return (
@@ -383,7 +386,7 @@ export default function CRMPage() {
         )}
 
         {/* Tabs */}
-        <Tabs tabs={tabs} activeTab={activeTab} onChange={(id) => setActiveTab(id as typeof activeTab)} className="grid-cols-3 sm:max-w-lg" />
+        <Tabs tabs={tabs} activeTab={activeTab} onChange={(id) => setActiveTab(id as typeof activeTab)} className="grid-cols-2 sm:grid-cols-4 sm:max-w-xl" />
 
         {/* ============ CLIENTS TAB ============ */}
         {activeTab === 'clients' && (
@@ -888,6 +891,13 @@ export default function CRMPage() {
                 })}
               </div>
             )}
+          </section>
+        )}
+
+        {/* Messages */}
+        {activeTab === 'messages' && (
+          <section className="mt-6">
+            <MessageCenter />
           </section>
         )}
       </div>

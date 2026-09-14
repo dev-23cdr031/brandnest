@@ -14,6 +14,7 @@ import {
   Crown,
   LayoutDashboard,
   Loader2,
+  MessageCircle,
   Plus,
   Trash2,
   Trophy,
@@ -33,6 +34,7 @@ import {
   EmptyState,
   LoadingState,
 } from '@/components/dashboard'
+import MessageCenter from '@/components/messages/MessageCenter'
 
 type Interview = {
   id: string
@@ -140,7 +142,9 @@ export default function HRPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [userName, setUserName] = useState('')
   const [userEmail, setUserEmail] = useState('')
-  const [activeTab, setActiveTab] = useState<'interviews' | 'completed' | 'candidates' | 'applications' | 'earnings' | 'teams'>('candidates')
+  const [activeTab, setActiveTab] = useState<
+    'interviews' | 'completed' | 'candidates' | 'applications' | 'earnings' | 'teams' | 'messages'
+  >('candidates')
 
   // Data
   const [interviews, setInterviews] = useState<Interview[]>([])
@@ -514,12 +518,14 @@ export default function HRPage() {
         { id: 'applications', label: 'Applications', icon: ClipboardList },
         { id: 'earnings', label: 'Amount Earned', icon: Banknote },
         { id: 'teams', label: 'Team Points', icon: Trophy },
+        { id: 'messages', label: 'Messages', icon: MessageCircle },
       ] as const)
     : ([
         { id: 'candidates', label: 'Candidate Assigned', icon: UsersRound },
         { id: 'applications', label: 'Applications', icon: ClipboardList },
         { id: 'earnings', label: 'Amount Earned', icon: Banknote },
         { id: 'teams', label: 'Team Points', icon: Trophy },
+        { id: 'messages', label: 'Messages', icon: MessageCircle },
       ] as const)
 
   return (
@@ -569,7 +575,7 @@ export default function HRPage() {
           tabs={tabs}
           activeTab={activeTab}
           onChange={(id) => setActiveTab(id as typeof activeTab)}
-          className={`grid-cols-2 ${isAdmin ? 'sm:grid-cols-6' : 'sm:grid-cols-4'}`}
+          className={`grid-cols-2 ${isAdmin ? 'sm:grid-cols-7' : 'sm:grid-cols-5'}`}
         />
 
         {/* ============ INTERVIEWS TAB ============ */}
@@ -1469,6 +1475,13 @@ export default function HRPage() {
                 })}
               </div>
             )}
+          </section>
+        )}
+
+        {/* Messages */}
+        {activeTab === 'messages' && (
+          <section className="mt-6">
+            <MessageCenter />
           </section>
         )}
       </div>

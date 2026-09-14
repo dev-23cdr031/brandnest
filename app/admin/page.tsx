@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import Image from 'next/image'
 import { TeamMemberAvatar } from '@/components/TeamMemberAvatar'
@@ -22,6 +22,7 @@ import {
   Loader2,
   LogIn,
   Mail,
+  MessageCircle,
   Pencil,
   Phone,
   Plus,
@@ -36,6 +37,8 @@ import {
 import { supabase } from '@/lib/supabase'
 import { DEVELOPER_EMAILS } from '@/lib/developers'
 import { HR_EMAILS, CRM_EMAILS, TESTER_EMAILS, isAdminEmail } from '@/lib/roles'
+import { getDisplayName, type AppUser } from '@/lib/messages'
+import MessageCenter from '@/components/messages/MessageCenter'
 
 // ============ TYPES ============
 type Order = {
@@ -476,7 +479,9 @@ export default function AdminPage() {
   const [checking, setChecking] = useState(true)
   const [authorized, setAuthorized] = useState(false)
   const [userName, setUserName] = useState('')
-  const [activeSection, setActiveSection] = useState<'overview' | 'orders' | 'hr' | 'crm' | 'tester' | 'developers' | 'applications' | 'teams'>('overview')
+  const [activeSection, setActiveSection] = useState<
+    'overview' | 'orders' | 'hr' | 'crm' | 'tester' | 'developers' | 'applications' | 'teams' | 'messages'
+  >('overview')
   const [refreshing, setRefreshing] = useState(false)
 
   // Orders
@@ -1308,6 +1313,21 @@ export default function AdminPage() {
     }
   }
 
+  // Customers who placed orders (so admins can message them too)
+  const customerRecipients: AppUser[] = useMemo(() => {
+    const map = new Map<string, AppUser>()
+    for (const o of orders) {
+      const e = (o.email || '').trim().toLowerCase()
+      if (!e || map.has(e)) continue
+      map.set(e, {
+        email: e,
+        name: (o.name || '').trim() || getDisplayName(e),
+        role: 'customer',
+      })
+    }
+    return [...map.values()]
+  }, [orders])
+
   // ============ RENDER ============
   if (checking) {
     return (
@@ -1379,6 +1399,7 @@ export default function AdminPage() {
     { id: 'developers', label: 'Developers', icon: Briefcase, color: 'text-purple-400', active: 'bg-purple-600' },
     { id: 'applications', label: 'Applications', icon: ClipboardList, color: 'text-orange-400', active: 'bg-orange-600' },
     { id: 'teams', label: 'Team Points', icon: Trophy, color: 'text-amber-400', active: 'bg-amber-600' },
+    { id: 'messages', label: 'Messages', icon: MessageCircle, color: 'text-pink-400', active: 'bg-pink-600' },
   ] as const
 
   return (
@@ -3727,6 +3748,13 @@ export default function AdminPage() {
                   )
                 })}
               </div>
+            </div>
+          )}
+
+          {/* ============ MESSAGES ============ */}
+          {activeSection === 'messages' && (
+            <div className="space-y-6">
+              <MessageCenter extraRecipients={customerRecipients} />
             </div>
           )}
         </div>
