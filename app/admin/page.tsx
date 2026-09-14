@@ -232,7 +232,7 @@ const mergeTeamDefaults = (data: Team[]): Team[] =>
     return {
       ...t,
       members: mergeTeamOneDefaults([{ ...t, members }])[0].members,
-      weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 4 : 0),
+      weeksWins: t.name === 'Team 1' ? 4 : (t.weeksWins ?? 0),
     }
   })
 

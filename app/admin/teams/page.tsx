@@ -156,7 +156,7 @@ export default function AdminTeamsPage() {
               seenIds.add(id)
               return { ...m, id }
             }),
-            weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 4 : 0),
+            weeksWins: t.name === 'Team 1' ? 4 : (t.weeksWins ?? 0),
           }
         })
         setTeams(mergeTeamOneDefaults(merged))
