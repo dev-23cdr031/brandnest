@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { TeamMemberAvatar } from '@/components/TeamMemberAvatar'
+import { mergeTeamOneDefaults } from '@/lib/team-points'
 import {
   BadgeCheck,
   Banknote,
@@ -143,7 +145,7 @@ export default function DeveloperDashboard() {
   const loadTeams = async () => {
     const { data, error } = await supabase.from('teams').select('*')
     if (!error && data && data.length > 0) {
-      setTeams(data as Team[])
+      setTeams(mergeTeamOneDefaults(data as Team[]))
     }
   }
 
@@ -425,9 +427,7 @@ export default function DeveloperDashboard() {
                               }`}
                             >
                               <div className="flex items-center gap-3">
-                                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${isTop ? 'bg-amber-400 text-black' : `${accentBg} ${accentText}`}`}>
-                                  {memberIndex + 1}
-                                </span>
+                                <TeamMemberAvatar name={member.name} />
                                 <div>
                                   <p className={`font-semibold ${isTop ? 'text-amber-300' : 'text-white'}`}>
                                     {member.name}

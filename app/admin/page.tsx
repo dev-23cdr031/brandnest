@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import Image from 'next/image'
+import { TeamMemberAvatar } from '@/components/TeamMemberAvatar'
+import { mergeTeamOneDefaults } from '@/lib/team-points'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -229,8 +231,8 @@ const mergeTeamDefaults = (data: Team[]): Team[] =>
     })
     return {
       ...t,
-      members,
-      weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 3 : 0),
+      members: mergeTeamOneDefaults([{ ...t, members }])[0].members,
+      weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 4 : 0),
     }
   })
 
@@ -3674,9 +3676,7 @@ export default function AdminPage() {
                               }`}
                             >
                               <div className="flex items-center gap-3">
-                                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${isTop ? 'bg-amber-400 text-black' : `${accentBg} ${accentText}`}`}>
-                                  {memberIndex + 1}
-                                </span>
+                                <TeamMemberAvatar name={member.name} />
                                 <div>
                                   <p className={`font-semibold ${isTop ? 'text-amber-300' : 'text-white'}`}>
                                     {member.name}

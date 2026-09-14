@@ -16,6 +16,8 @@ import {
   X,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { TeamMemberAvatar } from '@/components/TeamMemberAvatar'
+import { mergeTeamOneDefaults } from '@/lib/team-points'
 
 const ADMIN_EMAIL = 'devdharrshans.23csd@kongu.edu'
 
@@ -43,12 +45,14 @@ const initialTeams: Team[] = [
     id: 'team1',
     name: 'Team 1',
     color: 'red',
-    weeksWins: 3,
+    weeksWins: 4,
     members: [
       { id: 't1m1', name: 'Ranjith', points: 0 },
       { id: 't1m2', name: 'Manju Shri', points: 0 },
       { id: 't1m3', name: 'Gokul Shankar', points: 0 },
       { id: 't1m4', name: 'Priyanka', points: 0, isTeamLead: true },
+      { id: 't1m5', name: 'Rhea', points: 0 },
+      { id: 't1m6', name: 'Ridhesha', points: 0 },
     ],
   },
   {
@@ -152,10 +156,10 @@ export default function AdminTeamsPage() {
               seenIds.add(id)
               return { ...m, id }
             }),
-            weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 3 : 0),
+            weeksWins: t.weeksWins ?? (t.name === 'Team 1' ? 4 : 0),
           }
         })
-        setTeams(merged)
+        setTeams(mergeTeamOneDefaults(merged))
       }
       setLoading(false)
     }
@@ -387,9 +391,7 @@ export default function AdminTeamsPage() {
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${isTop ? 'bg-amber-400 text-black' : `${accentBg} ${accentText}`}`}>
-                            {memberIndex + 1}
-                          </span>
+                          <TeamMemberAvatar name={member.name} />
                           <div>
                             <p className={`font-semibold ${isTop ? 'text-amber-300' : 'text-white'}`}>
                               {member.name}

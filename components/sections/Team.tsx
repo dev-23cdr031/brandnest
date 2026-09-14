@@ -93,6 +93,28 @@ const teamMembers = [
     accent: 'from-red-500 to-zinc-50',
   },
   {
+    name: 'Ridhesha',
+    role: 'DIRECTOR',
+    title: 'Full Stack Developer',
+    skills: ['Web Development', 'API Integration', 'Problem Solving'],
+    bio: 'Building reliable end-to-end digital experiences for every project.',
+    email: undefined,
+    linkedin: undefined,
+    image: '/team/photos/ridhesha.jpg',
+    accent: 'from-white to-red-300',
+  },
+  {
+    name: 'Rhea',
+    role: 'ASST. DIRECTOR',
+    title: 'HR Manager & Full Stack Developer',
+    skills: ['People Operations', 'Web Development', 'Team Coordination'],
+    bio: 'Supporting the team through people operations and full stack development.',
+    email: undefined,
+    linkedin: undefined,
+    image: '/team/photos/rhea.jpg',
+    accent: 'from-red-400 to-zinc-100',
+  },
+  {
     name: 'Roshini M',
     role: 'DEVELOPER',
     title: 'Full Stack Developer',
@@ -115,28 +137,6 @@ const teamMembers = [
     accent: 'from-white to-red-300',
   },
   {
-    name: 'Rhea',
-    role: 'HR MANAGER',
-    title: 'HR Manager & Full Stack Developer',
-    skills: ['People Operations', 'Web Development', 'Team Coordination'],
-    bio: 'Supporting the team through people operations and full stack development.',
-    email: undefined,
-    linkedin: undefined,
-    image: '/team/photos/rhea.jpg',
-    accent: 'from-red-400 to-zinc-100',
-  },
-  {
-    name: 'Ridhesha',
-    role: 'DEVELOPER',
-    title: 'Full Stack Developer',
-    skills: ['Web Development', 'API Integration', 'Problem Solving'],
-    bio: 'Building reliable end-to-end digital experiences for every project.',
-    email: undefined,
-    linkedin: undefined,
-    image: '/team/photos/ridhesha.jpg',
-    accent: 'from-white to-red-300',
-  },
-  {
     name: 'Prakalya SB',
     role: 'DEVELOPER',
     title: 'Full Stack Developer',
@@ -155,8 +155,20 @@ const teamMembers = [
     bio: 'Creating strong client relationships and ensuring a smooth customer experience.',
     email: undefined,
     linkedin: undefined,
-    image: undefined,
+    image: '/team/photos/gokul-shankar.jpg',
+    imagePosition: '50% 32%',
     accent: 'from-red-500 to-zinc-50',
+  },
+  {
+    name: 'Ranjani P',
+    role: 'DEVELOPER',
+    title: 'Full Stack Developer & HR Manager',
+    skills: ['Web Development', 'People Operations', 'Team Coordination'],
+    bio: 'Supporting the team through full stack development and people operations.',
+    email: undefined,
+    linkedin: undefined,
+    image: '/team/photos/ranjani-p.jpg',
+    accent: 'from-red-300 to-white',
   },
   {
     name: 'Gokula Varshini K',
@@ -166,7 +178,8 @@ const teamMembers = [
     bio: 'Building reliable end-to-end digital experiences for every project.',
     email: undefined,
     linkedin: undefined,
-    image: undefined,
+    image: '/team/photos/gokula-varshini-k.jpg',
+    imagePosition: '50% 28%',
     accent: 'from-white to-red-300',
   },
   {
@@ -192,6 +205,17 @@ const teamMembers = [
     accent: 'from-red-400 to-zinc-100',
   },
   {
+    name: 'Keerthi Ratna',
+    role: 'CRM',
+    title: 'Customer Relationship Manager',
+    skills: ['Client Relations', 'Communication', 'Customer Success'],
+    bio: 'Creating strong client relationships and ensuring a smooth customer experience.',
+    email: undefined,
+    linkedin: undefined,
+    image: '/team/photos/keerthi-ratna.jpg',
+    accent: 'from-white to-red-300',
+  },
+  {
     name: 'Dhavanithi M',
     role: 'HR',
     title: 'HR Manager',
@@ -199,7 +223,8 @@ const teamMembers = [
     bio: 'Supporting a positive and well-coordinated team experience.',
     email: undefined,
     linkedin: undefined,
-    image: undefined,
+    image: '/team/photos/dhavanithi-m.jpg',
+    imagePosition: '50% 30%',
     accent: 'from-white to-red-300',
   },
   {
@@ -210,7 +235,7 @@ const teamMembers = [
     bio: 'Helping ensure each project is polished, reliable, and ready to launch.',
     email: undefined,
     linkedin: undefined,
-    image: '/team/photos/manju-sri.jpg',
+    image: '/team/photos/manju-sri.png',
     accent: 'from-red-500 to-rose-100',
   },
 ]
@@ -352,6 +377,7 @@ function TeamCard({ member, index }: { member: (typeof teamMembers)[number]; ind
             width={800}
             height={920}
             className="h-80 w-full object-cover transition duration-700 group-hover:scale-110 sm:h-96 lg:h-80 xl:h-96"
+            style={'imagePosition' in member && member.imagePosition ? { objectPosition: member.imagePosition } : undefined}
           />
         ) : (
           <div className="flex h-80 w-full items-center justify-center bg-gradient-to-br from-red-950 via-zinc-900 to-black sm:h-96 lg:h-80 xl:h-96">
