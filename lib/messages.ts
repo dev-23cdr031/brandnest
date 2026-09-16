@@ -7,10 +7,16 @@
 import { ADMIN_EMAILS, HR_EMAILS, CRM_EMAILS, TESTER_EMAILS, getRole } from './roles'
 import { DEVELOPER_EMAILS } from './developers'
 
+export type UserPhoto = {
+  src: string
+  position?: string
+}
+
 export type AppUser = {
   email: string
   name: string
   role: string
+  photo?: UserPhoto | null
 }
 
 export type Message = {
@@ -26,7 +32,14 @@ export type Message = {
  * People who should NOT appear in the messaging directory.
  * (They are still part of the team/roles elsewhere — just hidden from chat.)
  */
-export const MESSAGE_BLOCKED_EMAILS = ['pushparajnm.25cse@kongu.edu', 'nadhin.offx@gmail.com'] as const
+export const MESSAGE_BLOCKED_EMAILS = [
+  'pushparajnm.25cse@kongu.edu',
+  'nadhin.offx@gmail.com',
+  // Removed from the messages page on every dashboard (requested)
+  'ridheshavijayakumar.25cse@kongu.edu',
+  'ranjaniperiyasamy7@gmail.com',
+  'devdharrshan40@gmail.com',
+] as const
 
 const DISPLAY_NAMES: Record<string, string> = {
   // ---------- Admins ----------
@@ -60,6 +73,39 @@ const DISPLAY_NAMES: Record<string, string> = {
   'nadhin.offx@gmail.com': 'Nadhin',
   'ranjaniperiyasamy7@gmail.com': 'Ranjani Periyasamy',
   'ranjaniperiasamy7@gmail.com': 'Ranjani Periasamy',
+}
+
+/**
+ * Profile photos taken directly from the public Team page
+ * (/components/sections/Team.tsx). The optional `position` reuses the
+ * exact crop position tuned on the team cards, so faces stay in frame
+ * when the portrait is cropped into a circular message avatar.
+ */
+export const PHOTOS_BY_EMAIL: Record<string, UserPhoto> = {
+  // ---------- Admins ----------
+  'devdharrshans.23csd@kongu.edu': { src: '/team/photos/dev-dharrshan-s.jpg' },
+  'divyadharshinis.23csd@kongu.edu': { src: '/team/photos/divya-dharshini.jpg' },
+  'anusreed.23csd@kongu.edu': { src: '/team/photos/anusree-d.jpg' },
+  'arvind.23cse@kongu.edu': { src: '/team/photos/arvind-r.jpg' },
+  'avaneeshr.23csd@kongu.edu': { src: '/team/photos/avaneesh-r.jpg' },
+  // ---------- HR ----------
+  'rhear.25cse@kongu.edu': { src: '/team/photos/rhea.jpg' },
+  'dhavanithim.23csd@kongu.edu': { src: '/team/photos/dhavanithi-m.jpg', position: '50% 30%' },
+  'ranjanip.25cse@kongu.edu': { src: '/team/photos/ranjani-p.jpg' },
+  // ---------- CRM ----------
+  'gokulshankarm.23csd@kongu.edu': { src: '/team/photos/gokul-shankar.jpg', position: '50% 32%' },
+  // ---------- Testers ----------
+  'manjusrir.24chem@kongu.edu': { src: '/team/photos/manju-sri.png' },
+  // ---------- Developers ----------
+  'devdharrshan421@gmail.com': { src: '/team/photos/dev-dharrshan-s.jpg' },
+  'rhearajasekar@gmail.com': { src: '/team/photos/rhea.jpg' },
+  'roshinim.23csd@kongu.edu': { src: '/team/photos/roshini-m.jpg' },
+  'gokulavarshinik.23csd@kongu.edu': { src: '/team/photos/gokula-varshini-k.jpg', position: '50% 28%' },
+  'prakalyasb.23csd@kongu.edu': { src: '/team/photos/prakalya-sb.jpg' },
+  'ridhesavijayakumar.25cse@kongu.edu': { src: '/team/photos/ridhesha.jpg' },
+  'priyankab.25cse@kongu.edu': { src: '/team/photos/priyanka.jpg' },
+  'devvsharanns.24aid@kongu.edu': { src: '/team/photos/devv-sharann.jpg' },
+  'ranjaniperiasamy7@gmail.com': { src: '/team/photos/ranjani-p.jpg' },
 }
 
 /** Friendly display name for any email. */
@@ -102,7 +148,12 @@ export function getAllUsers(): AppUser[] {
     for (const email of emails) {
       const e = email.trim().toLowerCase()
       if (!e || blocked.has(e) || map.has(e)) continue
-      map.set(e, { email: e, name: getDisplayName(e), role: getRoleLabel(e) })
+      map.set(e, {
+        email: e,
+        name: getDisplayName(e),
+        role: getRoleLabel(e),
+        photo: PHOTOS_BY_EMAIL[e] || null,
+      })
     }
   }
   add(ADMIN_EMAILS)

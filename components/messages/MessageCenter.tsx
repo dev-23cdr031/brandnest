@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { FormEvent } from 'react'
+import type { FormEvent, ReactNode } from 'react'
+import Image from 'next/image'
 import {
   ArrowLeft,
   CheckCheck,
@@ -15,8 +16,10 @@ import {
   getAllUsers,
   getDisplayName,
   getRoleLabel,
+  MESSAGE_BLOCKED_EMAILS,
   type AppUser,
   type Message,
+  type UserPhoto,
 } from '@/lib/messages'
 
 type CurrentUser = {
@@ -29,6 +32,7 @@ type Conversation = {
   email: string
   name: string
   role: string
+  photo: UserPhoto | null
   lastMessage: Message | null
   unread: number
   messages: Message[]
@@ -53,6 +57,49 @@ const AVATAR_COLORS = [
 function avatarColor(name: string) {
   const hash = name.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
   return AVATAR_COLORS[hash % AVATAR_COLORS.length]
+}
+
+/**
+ * Circular avatar. Uses the person's real photo from the Team page when
+ * available (cropped with object-cover so the face stays in frame),
+ * otherwise falls back to a colored initial circle.
+ */
+function MessageAvatar({
+  name,
+  photo,
+  sizeClass,
+  textClass = 'text-sm',
+  className = '',
+  children,
+}: {
+  name: string
+  photo: UserPhoto | null | undefined
+  sizeClass: string
+  textClass?: string
+  className?: string
+  children?: ReactNode
+}) {
+  return (
+    <div
+      className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-full ${className} ${
+        photo?.src ? sizeClass : `${sizeClass} ${avatarColor(name)} ${textClass} font-black text-white`
+      }`}
+    >
+      {photo?.src ? (
+        <Image
+          src={photo.src}
+          alt={`${name} profile photo`}
+          width={128}
+          height={128}
+          className="h-full w-full object-cover"
+          style={photo.position ? { objectPosition: photo.position } : { objectPosition: '50% 22%' }}
+        />
+      ) : (
+        name.charAt(0).toUpperCase()
+      )}
+      {children}
+    </div>
+  )
 }
 
 function formatTime(iso: string) {
@@ -228,6 +275,8 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
   const conversations = useMemo<Conversation[]>(() => {
     if (!currentUser) return []
 
+    // Also drop any past conversations with people removed from the directory
+    const blocked = new Set(MESSAGE_BLOCKED_EMAILS.map((e) => e.toLowerCase()))
     const byPartner = new Map<string, Message[]>()
     for (const m of messages) {
       const mine = m.sender_email.toLowerCase() === currentUser.email
@@ -240,13 +289,14 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
     const convos = new Map<string, Conversation>()
     const ensure = (email: string) => {
       const key = email.trim().toLowerCase()
-      if (!key || key === currentUser.email) return
+      if (!key || key === currentUser.email || blocked.has(key)) return
       if (!convos.has(key)) {
         const known = usersIndex.get(key)
         convos.set(key, {
           email: key,
           name: known?.name || getDisplayName(key),
           role: known?.role || getRoleLabel(key),
+          photo: known?.photo || null,
           lastMessage: null,
           unread: 0,
           messages: [],
@@ -338,11 +388,11 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
           </div>
           <div>
             <h3 className="text-lg font-black text-white">Messages</h3>
-            <p className="text-xs text-white/50">Private chat with the BrandNest team</p>
+            <p className="text-xs text-white/75">Private chat with the BrandNest team</p>
           </div>
         </div>
         {totalUnread > 0 && (
-          <span className="rounded-full border border-red-400/30 bg-red-500/15 px-3 py-1 text-xs font-bold text-red-300">
+          <span className="rounded-full border border-red-400/40 bg-red-500/25 px-3 py-1 text-xs font-bold text-red-200">
             {totalUnread} unread
           </span>
         )}
@@ -353,24 +403,24 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
         <aside className={`${selected ? 'hidden lg:block' : 'block'} border-white/10 lg:border-r`}>
           <div className="p-4">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search people..."
-                className="w-full rounded-xl border border-white/10 bg-black/40 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-red-400"
+                className="w-full rounded-xl border border-white/15 bg-black/40 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-white/60 focus:border-red-400"
               />
             </div>
           </div>
 
           <div className="h-[440px] space-y-1 overflow-y-auto px-2 pb-2">
             {loading ? (
-              <div className="flex items-center justify-center py-16 text-white/50">
+              <div className="flex items-center justify-center py-16 text-white/75">
                 <Loader2 className="mr-2 h-5 w-5 animate-spin text-red-400" />
                 Loading messages...
               </div>
             ) : filteredConversations.length === 0 ? (
-              <div className="px-4 py-16 text-center text-sm text-white/40">
+              <div className="px-4 py-16 text-center text-sm text-white/70">
                 No conversations found.
                 <br />
                 Pick someone from the team to get started.
@@ -391,28 +441,25 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
                         : 'border border-transparent hover:bg-white/[0.06]'
                     }`}
                   >
-                    <div
-                      className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${avatarColor(c.name)} text-sm font-black text-white`}
-                    >
-                      {c.name.charAt(0).toUpperCase()}
+                    <MessageAvatar name={c.name} photo={c.photo} sizeClass="h-11 w-11" textClass="text-sm">
                       {c.unread > 0 && (
                         <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[0.65rem] font-bold shadow-lg">
                           {c.unread}
                         </span>
                       )}
-                    </div>
+                    </MessageAvatar>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <p className="truncate text-sm font-bold text-white">{c.name}</p>
                         {c.lastMessage && (
-                          <span className="shrink-0 text-[0.65rem] text-white/40">
+                          <span className="shrink-0 text-[0.65rem] font-medium text-white/65">
                             {formatRelative(c.lastMessage.created_at)}
                           </span>
                         )}
                       </div>
                       <p
                         className={`truncate text-xs ${
-                          c.unread > 0 ? 'font-semibold text-white/80' : 'text-white/45'
+                          c.unread > 0 ? 'font-semibold text-white' : 'text-white/70'
                         }`}
                       >
                         {previewText}
@@ -439,14 +486,15 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </button>
-                <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${avatarColor(selected.name)} text-sm font-black text-white`}
-                >
-                  {selected.name.charAt(0).toUpperCase()}
-                </div>
+                <MessageAvatar
+                  name={selected.name}
+                  photo={selected.photo}
+                  sizeClass="h-10 w-10"
+                  textClass="text-sm"
+                />
                 <div className="min-w-0">
                   <p className="truncate font-bold text-white">{selected.name}</p>
-                  <p className="truncate text-xs text-white/50">
+                  <p className="truncate text-xs text-white/75">
                     {selected.role} · {selected.email}
                   </p>
                 </div>
@@ -458,9 +506,9 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
                 className="h-[440px] flex-1 space-y-2 overflow-y-auto px-5 py-4"
               >
                 {selected.messages.length === 0 ? (
-                  <div className="flex h-full flex-col items-center justify-center text-center text-sm text-white/45">
-                    <MessageCircle className="mb-3 h-10 w-10 text-white/20" />
-                    <p className="font-semibold text-white/70">Message {selected.name}</p>
+                  <div className="flex h-full flex-col items-center justify-center text-center text-sm text-white/70">
+                    <MessageCircle className="mb-3 h-10 w-10 text-white/40" />
+                    <p className="font-bold text-white">Message {selected.name}</p>
                     <p className="mt-1 max-w-xs">
                       Messages are sent securely through Supabase and delivered instantly. Say
                       hello! 👋
@@ -478,7 +526,7 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
                       <div key={m.id}>
                         {showDayDivider && (
                           <div className="my-3 flex justify-center">
-                            <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[0.65rem] font-semibold text-white/50">
+                            <span className="rounded-full border border-white/15 bg-black/40 px-3 py-1 text-[0.65rem] font-semibold text-white/80">
                               {new Date(m.created_at).toLocaleDateString('en-IN', {
                                 day: 'numeric',
                                 month: 'short',
@@ -489,23 +537,25 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
                         )}
                         <div className={`flex ${mine ? 'justify-end' : 'justify-start'} gap-2`}>
                           {!mine && (
-                            <div
-                              className={`mt-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${avatarColor(selected.name)} text-[0.65rem] font-black text-white`}
-                            >
-                              {selected.name.charAt(0).toUpperCase()}
-                            </div>
+                            <MessageAvatar
+                              name={selected.name}
+                              photo={selected.photo}
+                              className="mt-auto"
+                              sizeClass="h-7 w-7"
+                              textClass="text-[0.65rem]"
+                            />
                           )}
                           <div
                             className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                               mine
-                                ? 'rounded-br-md bg-red-600 text-white'
-                                : 'rounded-bl-md border border-white/10 bg-white/[0.06] text-white/90'
+                                ? 'rounded-br-md bg-gradient-to-r from-red-600 to-red-500 text-white'
+                                : 'rounded-bl-md border border-white/15 bg-white/[0.09] text-white'
                             }`}
                           >
                             <p className="break-words whitespace-pre-wrap">{m.body}</p>
                             <div
                               className={`mt-1 flex items-center justify-end gap-1 text-[0.6rem] ${
-                                mine ? 'text-white/70' : 'text-white/40'
+                                mine ? 'text-white/85' : 'text-white/75'
                               }`}
                             >
                               {formatTime(m.created_at)}
@@ -513,7 +563,7 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
                                 (m.read_at ? (
                                   <CheckCheck className="h-3 w-3 text-emerald-300" />
                                 ) : (
-                                  <CheckCheck className="h-3 w-3 opacity-60" />
+                                  <CheckCheck className="h-3 w-3 opacity-80" />
                                 ))}
                             </div>
                           </div>
@@ -536,7 +586,7 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     placeholder={`Message ${selected.name}...`}
-                    className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-red-400"
+                    className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/60 focus:border-red-400"
                   />
                   <button
                     type="submit"
@@ -554,9 +604,9 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
               </form>
             </>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center px-6 py-24 text-center text-white/45">
-              <MessageCircle className="mb-4 h-12 w-12 text-white/20" />
-              <p className="font-semibold text-white/70">Select a conversation</p>
+            <div className="flex h-full flex-col items-center justify-center px-6 py-24 text-center text-white/70">
+              <MessageCircle className="mb-4 h-12 w-12 text-white/40" />
+              <p className="font-bold text-white">Select a conversation</p>
               <p className="mt-1 text-sm">Message anyone on the team from this dashboard.</p>
             </div>
           )}
