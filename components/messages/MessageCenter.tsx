@@ -381,26 +381,26 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
   return (
     <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04]">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-black/25 px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-500/15 text-red-400">
+      <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-black/25 px-4 py-3.5 sm:px-5 sm:py-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-500/15 text-red-400">
             <MessageCircle className="h-5 w-5" />
           </div>
-          <div>
-            <h3 className="text-lg font-black text-white">Messages</h3>
-            <p className="text-xs text-white/75">Private chat with the BrandNest team</p>
+          <div className="min-w-0">
+            <h3 className="truncate text-lg font-black text-white">Messages</h3>
+            <p className="truncate text-xs text-white/75">Private chat with the BrandNest team</p>
           </div>
         </div>
         {totalUnread > 0 && (
-          <span className="rounded-full border border-red-400/40 bg-red-500/25 px-3 py-1 text-xs font-bold text-red-200">
+          <span className="shrink-0 rounded-full border border-red-400/40 bg-red-500/25 px-3 py-1 text-xs font-bold text-red-200">
             {totalUnread} unread
           </span>
         )}
       </div>
 
-      <div className="grid min-h-[560px] lg:grid-cols-[340px_1fr]">
+      <div className="grid min-w-0 lg:min-h-[560px] lg:grid-cols-[340px_1fr]">
         {/* ============ LEFT: CONVERSATION LIST ============ */}
-        <aside className={`${selected ? 'hidden lg:block' : 'block'} border-white/10 lg:border-r`}>
+        <aside className={`${selected ? 'hidden lg:block' : 'block'} min-h-0 min-w-0 border-white/10 lg:border-r`}>
           <div className="p-4">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
@@ -413,7 +413,7 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
             </div>
           </div>
 
-          <div className="h-[440px] space-y-1 overflow-y-auto px-2 pb-2">
+          <div className="h-[55dvh] min-h-[280px] space-y-1 overflow-y-auto overscroll-contain px-2 pb-2 lg:h-[440px]">
             {loading ? (
               <div className="flex items-center justify-center py-16 text-white/75">
                 <Loader2 className="mr-2 h-5 w-5 animate-spin text-red-400" />
@@ -473,11 +473,11 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
         </aside>
 
         {/* ============ RIGHT: CONVERSATION THREAD ============ */}
-        <div className={`${selected ? 'flex' : 'hidden lg:flex'} flex-col`}>
+        <div className={`${selected ? 'flex' : 'hidden lg:flex'} h-full min-h-0 min-w-0 flex-col`}>
           {selected && currentUser ? (
             <>
               {/* Thread header */}
-              <div className="flex items-center gap-3 border-b border-white/10 bg-black/25 px-5 py-3">
+              <div className="flex items-center gap-3 border-b border-white/10 bg-black/25 px-4 py-3 sm:px-5">
                 <button
                   type="button"
                   onClick={() => setSelectedEmail(null)}
@@ -503,13 +503,13 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
               {/* Message bubbles */}
               <div
                 ref={threadRef}
-                className="h-[440px] flex-1 space-y-2 overflow-y-auto px-5 py-4"
+                className="h-[55dvh] min-h-[280px] flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-4 sm:px-5 lg:h-[440px]"
               >
                 {selected.messages.length === 0 ? (
-                  <div className="flex h-full flex-col items-center justify-center text-center text-sm text-white/70">
-                    <MessageCircle className="mb-3 h-10 w-10 text-white/40" />
-                    <p className="font-bold text-white">Message {selected.name}</p>
-                    <p className="mt-1 max-w-xs">
+                  <div className="flex h-full w-full flex-col items-center justify-center px-4 text-center text-sm text-white/70">
+                    <MessageCircle className="mb-3 h-10 w-10 shrink-0 text-white/40" />
+                    <p className="break-words font-bold text-white">Message {selected.name}</p>
+                    <p className="mt-1 max-w-xs px-4">
                       Messages are sent securely through Supabase and delivered instantly. Say
                       hello! 👋
                     </p>
@@ -546,7 +546,7 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
                             />
                           )}
                           <div
-                            className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                            className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed sm:max-w-[78%] sm:px-4 sm:py-2.5 ${
                               mine
                                 ? 'rounded-br-md bg-gradient-to-r from-red-600 to-red-500 text-white'
                                 : 'rounded-bl-md border border-white/15 bg-white/[0.09] text-white'
@@ -575,7 +575,7 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
               </div>
 
               {/* Composer */}
-              <form onSubmit={handleSend} className="border-t border-white/10 bg-black/25 p-4">
+              <form onSubmit={handleSend} className="border-t border-white/10 bg-black/25 p-3 sm:p-4">
                 {sendError && (
                   <p className="mb-3 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-2.5 text-xs text-red-200">
                     {sendError}
@@ -604,8 +604,8 @@ export default function MessageCenter({ extraRecipients = [] }: MessageCenterPro
               </form>
             </>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center px-6 py-24 text-center text-white/70">
-              <MessageCircle className="mb-4 h-12 w-12 text-white/40" />
+            <div className="flex h-full flex-col items-center justify-center px-4 py-8 text-center text-white/70">
+              <MessageCircle className="mb-4 h-12 w-12 shrink-0 text-white/40" />
               <p className="font-bold text-white">Select a conversation</p>
               <p className="mt-1 text-sm">Message anyone on the team from this dashboard.</p>
             </div>
